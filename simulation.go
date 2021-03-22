@@ -73,6 +73,14 @@ func (sim *Simulation) Run() {
 	}
 }
 
+func (sim *Simulation) RunUntil(target float64) {
+	for len(sim.eq) > 0 && sim.eq[0].time <= target {
+		sim.Step()
+	}
+
+	sim.Now = target
+}
+
 func (sim *Simulation) schedule(ev *Event, delay float64) {
 	time := sim.Now + delay
 	sim.eq.queue(ev, time)
