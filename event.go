@@ -13,8 +13,6 @@ const (
 type Event struct {
 	Simulation *Simulation
 	State      State
-	Waiting    int
-	Channel    chan struct{}
 }
 
 func (state State) String() string {
@@ -28,15 +26,6 @@ func (state State) String() string {
 	default:
 		return "Invalid"
 	}
-}
-
-func (ev *Event) Wait() {
-	if ev.State == Triggered || ev.State == Processed {
-		return
-	}
-
-	ev.Waiting++
-	<-ev.Channel
 }
 
 func (ev *Event) Trigger() bool {
@@ -65,7 +54,13 @@ func (ev *Event) Process() {
 
 	ev.State = Processed
 
-	for i := 0; i < ev.Waiting; i++ {
-		ev.Channel <- struct{}{}
+	// TODO
+}
+
+func (ev *Event) Wait() {
+	if ev.State == Triggered || ev.State == Processed {
+		return
 	}
+
+	// TODO
 }

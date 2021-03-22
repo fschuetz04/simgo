@@ -2,7 +2,6 @@ package main
 
 import (
 	"container/heap"
-	"fmt"
 )
 
 type Proc func()
@@ -10,27 +9,20 @@ type Proc func()
 type Simulation struct {
 	Now        float64
 	EventQueue EventQueue
-	Channel    chan struct{}
-	Processes  int
 }
 
 func NewSimulation() *Simulation {
-	return &Simulation{Channel: make(chan struct{})}
+	return &Simulation{}
 }
 
 func (sim *Simulation) Event() *Event {
-	return &Event{Simulation: sim, Channel: make(chan struct{})}
+	return &Event{Simulation: sim}
 }
 
 func (sim *Simulation) Timeout(delay float64) *Event {
 	ev := sim.Event()
 	ev.TriggerDelayed(delay)
 	return ev
-}
-
-func (sim *Simulation) Process() {
-	sim.Processes++
-	<-sim.Channel
 }
 
 func (sim *Simulation) Schedule(ev *Event, delay float64) {
@@ -51,15 +43,6 @@ func (sim *Simulation) Step() bool {
 }
 
 func (sim *Simulation) Run() {
-	sim.Start()
-
 	for sim.Step() {
-	}
-}
-
-func (sim *Simulation) Start() {
-	for i := 0; i < sim.Processes; i++ {
-		fmt.Println("Starting process")
-		sim.Channel <- struct{}{}
 	}
 }
