@@ -4,25 +4,20 @@ import (
 	"fmt"
 )
 
-func process(sim *Simulation, name string, timeout float64) {
-	proc := sim.Process()
-
-	fmt.Printf("[%4.1f] %s 0\n", sim.Now, name)
+func process(proc Process, name string, timeout float64) {
+	fmt.Printf("[%4.1f] %s 0\n", proc.Now, name)
 
 	for i := 1; i <= 2; i++ {
-		proc.Wait(sim.Timeout(timeout))
-		fmt.Printf("[%4.1f] %s %d\n", sim.Now, name, i)
+		proc.Wait(proc.Timeout(timeout))
+		fmt.Printf("[%4.1f] %s %d\n", proc.Now, name, i)
 	}
-
-	proc.Exit()
 }
 
 func main() {
 	sim := &Simulation{}
 
-	sim.Add(2)
-	go process(sim, "A", 2)
-	go process(sim, "B", 10)
+	sim.Start(func(proc Process) { process(proc, "A", 2) })
+	sim.Start(func(proc Process) { process(proc, "B", 5) })
 
 	sim.Run()
 }

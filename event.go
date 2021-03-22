@@ -2,40 +2,27 @@ package main
 
 import "log"
 
-type State int
+type state int
 
 const (
-	Pending State = iota
-	Triggered
-	Processed
+	pending state = iota
+	triggered
+	processed
 )
 
 type Event struct {
-	Simulation *Simulation
-	State      State
-	Handlers   []Process
-}
-
-func (state State) String() string {
-	switch state {
-	case Pending:
-		return "Pending"
-	case Triggered:
-		return "Triggered"
-	case Processed:
-		return "Processed"
-	default:
-		return "Invalid"
-	}
+	sim      *Simulation
+	state    state
+	handlers []Process
 }
 
 func (ev *Event) Trigger() bool {
-	if ev.State != Pending {
+	if ev.state != pending {
 		return false
 	}
 
-	ev.State = Triggered
-	ev.Simulation.Schedule(ev, 0)
+	ev.state = triggered
+	ev.sim.schedule(ev, 0)
 	return true
 }
 
@@ -44,32 +31,35 @@ func (ev *Event) TriggerDelayed(delay float64) bool {
 		log.Fatalf("(*Event).TriggerDelayed: delay must not be negative: %f\n", delay)
 	}
 
-	if ev.State != Pending {
+	if ev.state != pending {
 		return false
 	}
 
-	ev.Simulation.Schedule(ev, delay)
+	ev.sim.schedule(ev, delay)
 	return true
 }
 
-func (ev *Event) Process() {
-	if ev.State == Processed {
+func (ev *Event) process() {
+	if ev.state == processed {
 		return
 	}
 
-	ev.State = Processed
+	ev.state = processed
 
-	for _, process := range ev.Handlers {
-		process <- struct{}{}
-		<-process
+	for _, proc := range ev.handlers {
+		// yield to process
+		proc.sync <- struct{}{}
+
+		// wait for process
+		<-proc.sync
 	}
 }
 
-func (ev *Event) AddHandler(handler Process) bool {
-	if ev.State != Pending {
+func (ev *Event) addHandler(handler Process) bool {
+	if ev.state != pending {
 		return false
 	}
 
-	ev.Handlers = append(ev.Handlers, handler)
+	ev.handlers = append(ev.handlers, handler)
 	return true
 }

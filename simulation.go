@@ -6,31 +6,39 @@ import (
 )
 
 type Simulation struct {
-	sync.Mutex
-	sync.WaitGroup
-	Now        float64
-	EventQueue EventQueue
+	Now   float64
+	eq    eventQueue
+	mutex sync.Mutex
 }
 
-func (sim *Simulation) Process() Process {
-	proc := make(chan struct{})
+type Runner func(proc Process)
+
+func (sim *Simulation) Start(runner Runner) Process {
+	proc := Process{
+		Simulation: sim,
+		sync:       make(chan struct{}),
+	}
 
 	ev := sim.Event()
-	ev.AddHandler(proc)
+	ev.addHandler(proc)
 
-	sim.Lock()
+	sim.mutex.Lock()
 	ev.Trigger()
-	sim.Unlock()
+	sim.mutex.Unlock()
 
-	sim.Done()
+	go func() {
+		<-proc.sync
 
-	<-proc
+		runner(proc)
+
+		proc.sync <- struct{}{}
+	}()
 
 	return proc
 }
 
 func (sim *Simulation) Event() *Event {
-	return &Event{Simulation: sim}
+	return &Event{sim: sim}
 }
 
 func (sim *Simulation) Timeout(delay float64) *Event {
@@ -43,30 +51,24 @@ func (sim *Simulation) Timeout(delay float64) *Event {
 	return ev
 }
 
-func (sim *Simulation) Schedule(ev *Event, delay float64) {
-	if delay < 0 {
-		log.Fatalf("(*Simulation).Schedule: delay must not be negative: %f\n", delay)
-	}
-
-	time := sim.Now + delay
-	sim.EventQueue.Queue(ev, time)
-}
-
 func (sim *Simulation) Step() bool {
-	if len(sim.EventQueue) == 0 {
+	if len(sim.eq) == 0 {
 		return false
 	}
 
-	qe := sim.EventQueue.Dequeue()
-	sim.Now = qe.Time
-	qe.Event.Process()
+	qe := sim.eq.dequeue()
+	sim.Now = qe.time
+	qe.event.process()
 
 	return true
 }
 
 func (sim *Simulation) Run() {
-	sim.Wait()
-
 	for sim.Step() {
 	}
+}
+
+func (sim *Simulation) schedule(ev *Event, delay float64) {
+	time := sim.Now + delay
+	sim.eq.queue(ev, time)
 }

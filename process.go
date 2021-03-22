@@ -1,16 +1,19 @@
 package main
 
-type Process chan struct{}
+type Process struct {
+	*Simulation
+	sync chan struct{}
+}
 
 func (proc Process) Wait(ev *Event) {
-	if !ev.AddHandler(proc) {
+	if !ev.addHandler(proc) {
+		// event was not pending
 		return
 	}
 
-	proc <- struct{}{}
-	<-proc
-}
+	// yield to simulation
+	proc.sync <- struct{}{}
 
-func (proc Process) Exit() {
-	proc <- struct{}{}
+	// wait for simulation
+	<-proc.sync
 }
