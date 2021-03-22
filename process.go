@@ -1,4 +1,4 @@
-package main
+package simgo
 
 type Awaitable interface {
 	addHandler(proc Process) bool
