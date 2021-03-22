@@ -16,6 +16,7 @@ type Runner func(proc Process)
 func (sim *Simulation) Start(runner Runner) Process {
 	proc := Process{
 		Simulation: sim,
+		Event:      sim.Event(),
 		sync:       make(chan struct{}),
 	}
 
@@ -27,10 +28,14 @@ func (sim *Simulation) Start(runner Runner) Process {
 	sim.mutex.Unlock()
 
 	go func() {
+		// wait for simulation
 		<-proc.sync
 
 		runner(proc)
 
+		proc.Trigger()
+
+		// yield to simulation
 		proc.sync <- struct{}{}
 	}()
 
