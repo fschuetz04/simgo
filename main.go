@@ -18,7 +18,7 @@ func process(sim *Simulation, name string, timeout float64) {
 }
 
 func main() {
-	sim := NewSimulation()
+	sim := &Simulation{}
 
 	sim.Add(2)
 	go process(sim, "A", 2)

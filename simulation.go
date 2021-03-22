@@ -12,10 +12,6 @@ type Simulation struct {
 	EventQueue EventQueue
 }
 
-func NewSimulation() *Simulation {
-	return &Simulation{}
-}
-
 func (sim *Simulation) Process() Process {
 	proc := make(chan struct{})
 
