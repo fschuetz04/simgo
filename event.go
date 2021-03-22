@@ -1,6 +1,6 @@
 package main
 
-type Handler func()
+import "log"
 
 type State int
 
@@ -13,6 +13,7 @@ const (
 type Event struct {
 	Simulation *Simulation
 	State      State
+	Handlers   []*Process
 }
 
 func (state State) String() string {
@@ -39,6 +40,10 @@ func (ev *Event) Trigger() bool {
 }
 
 func (ev *Event) TriggerDelayed(delay float64) bool {
+	if delay < 0 {
+		log.Fatalf("(*Event).TriggerDelayed: delay must not be negative: %f\n", delay)
+	}
+
 	if ev.State != Pending {
 		return false
 	}
@@ -54,13 +59,17 @@ func (ev *Event) Process() {
 
 	ev.State = Processed
 
-	// TODO
+	for _, process := range ev.Handlers {
+		process.Sync <- struct{}{}
+		<-process.Sync
+	}
 }
 
-func (ev *Event) Wait() {
-	if ev.State == Triggered || ev.State == Processed {
-		return
+func (ev *Event) AddHandler(handler *Process) bool {
+	if ev.State != Pending {
+		return false
 	}
 
-	// TODO
+	ev.Handlers = append(ev.Handlers, handler)
+	return true
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"container/heap"
+	"log"
 )
 
 type Proc func()
@@ -15,19 +15,39 @@ func NewSimulation() *Simulation {
 	return &Simulation{}
 }
 
+func (sim *Simulation) Process() *Process {
+	proc := &Process{Sync: make(chan struct{})}
+
+	ev := sim.Event()
+	ev.AddHandler(proc)
+	ev.Trigger()
+
+	<-proc.Sync
+
+	return proc
+}
+
 func (sim *Simulation) Event() *Event {
 	return &Event{Simulation: sim}
 }
 
 func (sim *Simulation) Timeout(delay float64) *Event {
+	if delay < 0 {
+		log.Fatalf("(*Simulation).Timeout: delay must not be negative: %f\n", delay)
+	}
+
 	ev := sim.Event()
 	ev.TriggerDelayed(delay)
 	return ev
 }
 
 func (sim *Simulation) Schedule(ev *Event, delay float64) {
-	qe := QueuedEvent{Time: sim.Now, Event: ev}
-	heap.Push(&sim.EventQueue, qe)
+	if delay < 0 {
+		log.Fatalf("(*Simulation).Schedule: delay must not be negative: %f\n", delay)
+	}
+
+	time := sim.Now + delay
+	sim.EventQueue.Queue(ev, time)
 }
 
 func (sim *Simulation) Step() bool {
@@ -35,7 +55,7 @@ func (sim *Simulation) Step() bool {
 		return false
 	}
 
-	qe := heap.Pop(&sim.EventQueue).(QueuedEvent)
+	qe := sim.EventQueue.Dequeue()
 	sim.Now = qe.Time
 	qe.Event.Process()
 

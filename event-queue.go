@@ -1,8 +1,10 @@
 package main
 
+import "container/heap"
+
 type QueuedEvent struct {
-	Time  float64
 	Event *Event
+	Time  float64
 }
 
 type EventQueue []QueuedEvent
@@ -20,4 +22,15 @@ func (eq *EventQueue) Pop() interface{} {
 	item := (*eq)[n-1]
 	*eq = (*eq)[:n-1]
 	return item
+}
+
+func (eq *EventQueue) Queue(ev *Event, time float64) {
+	heap.Push(eq, QueuedEvent{
+		Event: ev,
+		Time:  time,
+	})
+}
+
+func (eq *EventQueue) Dequeue() QueuedEvent {
+	return heap.Pop(eq).(QueuedEvent)
 }
