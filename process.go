@@ -1,6 +1,6 @@
 package simgo
 
-type Awaitable interface {
+type awaitable interface {
 	addHandler(proc Process) bool
 }
 
@@ -10,7 +10,7 @@ type Process struct {
 	sync chan struct{}
 }
 
-func (proc Process) Wait(ev Awaitable) {
+func (proc Process) Wait(ev awaitable) {
 	if !ev.addHandler(proc) {
 		// event was not pending
 		return
