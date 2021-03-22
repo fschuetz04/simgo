@@ -13,7 +13,7 @@ const (
 type Event struct {
 	Simulation *Simulation
 	State      State
-	Handlers   []*Process
+	Handlers   []Process
 }
 
 func (state State) String() string {
@@ -60,12 +60,12 @@ func (ev *Event) Process() {
 	ev.State = Processed
 
 	for _, process := range ev.Handlers {
-		process.Sync <- struct{}{}
-		<-process.Sync
+		process <- struct{}{}
+		<-process
 	}
 }
 
-func (ev *Event) AddHandler(handler *Process) bool {
+func (ev *Event) AddHandler(handler Process) bool {
 	if ev.State != Pending {
 		return false
 	}

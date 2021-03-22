@@ -2,37 +2,27 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
 func process(sim *Simulation, name string, timeout float64) {
-	fmt.Printf("[%s] [%f] Initializing process\n", name, sim.Now)
-
 	proc := sim.Process()
 
-	fmt.Printf("[%s] [%f] 0\n", name, sim.Now)
+	fmt.Printf("[%4.1f] %s 0\n", sim.Now, name)
 
 	for i := 1; i <= 2; i++ {
-		sim.Timeout(timeout)
-		fmt.Printf("[%s] [%f] %d\n", name, sim.Now, i)
+		proc.Wait(sim.Timeout(timeout))
+		fmt.Printf("[%4.1f] %s %d\n", sim.Now, name, i)
 	}
 
 	proc.Exit()
-	fmt.Printf("[%s] [%f] End\n", name, sim.Now)
 }
 
 func main() {
 	sim := NewSimulation()
 
-	go process(sim, "A", 5)
+	sim.Add(2)
+	go process(sim, "A", 2)
 	go process(sim, "B", 10)
 
-	time.Sleep(time.Second)
-
-	fmt.Println("[M] Running simulation")
 	sim.Run()
-
-	time.Sleep(time.Second)
-
-	fmt.Println("[M] End")
 }

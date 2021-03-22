@@ -2,11 +2,12 @@ package main
 
 import (
 	"log"
+	"sync"
 )
 
-type Proc func()
-
 type Simulation struct {
+	sync.Mutex
+	sync.WaitGroup
 	Now        float64
 	EventQueue EventQueue
 }
@@ -15,14 +16,19 @@ func NewSimulation() *Simulation {
 	return &Simulation{}
 }
 
-func (sim *Simulation) Process() *Process {
-	proc := &Process{Sync: make(chan struct{})}
+func (sim *Simulation) Process() Process {
+	proc := make(chan struct{})
 
 	ev := sim.Event()
 	ev.AddHandler(proc)
-	ev.Trigger()
 
-	<-proc.Sync
+	sim.Lock()
+	ev.Trigger()
+	sim.Unlock()
+
+	sim.Done()
+
+	<-proc
 
 	return proc
 }
@@ -63,6 +69,8 @@ func (sim *Simulation) Step() bool {
 }
 
 func (sim *Simulation) Run() {
+	sim.Wait()
+
 	for sim.Step() {
 	}
 }
