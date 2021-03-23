@@ -74,6 +74,10 @@ func (sim *Simulation) Run() {
 }
 
 func (sim *Simulation) RunUntil(target float64) {
+	if target < 0 {
+		log.Fatalf("(*Simulation).RunUntil: target must not be negative: %f\n", target)
+	}
+
 	for len(sim.eq) > 0 && sim.eq[0].time <= target {
 		sim.Step()
 	}
