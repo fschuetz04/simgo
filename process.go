@@ -1,7 +1,7 @@
 package simgo
 
 type awaitable interface {
-	addHandler(proc Process) bool
+	addHandlerProcess(proc Process) bool
 }
 
 type Process struct {
@@ -11,7 +11,7 @@ type Process struct {
 }
 
 func (proc Process) Wait(ev awaitable) {
-	if !ev.addHandler(proc) {
+	if !ev.addHandlerProcess(proc) {
 		// event was not pending
 		return
 	}

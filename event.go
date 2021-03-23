@@ -13,7 +13,7 @@ const (
 type Event struct {
 	sim      *Simulation
 	state    state
-	handlers []Process
+	handlers []func()
 }
 
 func (ev *Event) Trigger() bool {
@@ -46,20 +46,26 @@ func (ev *Event) process() {
 
 	ev.state = processed
 
-	for _, proc := range ev.handlers {
-		// yield to process
-		proc.sync <- struct{}{}
-
-		// wait for process
-		<-proc.sync
+	for _, handler := range ev.handlers {
+		handler()
 	}
 }
 
-func (ev *Event) addHandler(handler Process) bool {
+func (ev *Event) addHandler(handler func()) bool {
 	if ev.state != pending {
 		return false
 	}
 
 	ev.handlers = append(ev.handlers, handler)
 	return true
+}
+
+func (ev *Event) addHandlerProcess(proc Process) bool {
+	return ev.addHandler(func() {
+		// yield to process
+		proc.sync <- struct{}{}
+
+		// wait for process
+		<-proc.sync
+	})
 }

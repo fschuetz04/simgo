@@ -21,7 +21,7 @@ func (sim *Simulation) Start(runner Runner) Process {
 	}
 
 	ev := sim.Event()
-	ev.addHandler(proc)
+	ev.addHandlerProcess(proc)
 
 	sim.mutex.Lock()
 	ev.Trigger()
