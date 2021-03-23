@@ -52,7 +52,7 @@ func (ev *Event) process() {
 }
 
 func (ev *Event) addHandler(handler func()) bool {
-	if ev.state != pending {
+	if ev.state == processed {
 		return false
 	}
 
