@@ -8,6 +8,7 @@ const (
 	pending state = iota
 	triggered
 	processed
+	aborted
 )
 
 type Event struct {
@@ -36,6 +37,15 @@ func (ev *Event) TriggerDelayed(delay float64) bool {
 	}
 
 	ev.sim.schedule(ev, delay)
+	return true
+}
+
+func (ev *Event) Abort() bool {
+	if ev.state != pending {
+		return false
+	}
+
+	ev.state = aborted
 	return true
 }
 

@@ -6,8 +6,8 @@ type awaitable interface {
 
 type Process struct {
 	*Simulation
-	event *Event
-	sync  chan struct{}
+	ev   *Event
+	sync chan struct{}
 }
 
 func (proc Process) Wait(ev awaitable) {
@@ -24,5 +24,5 @@ func (proc Process) Wait(ev awaitable) {
 }
 
 func (proc Process) addHandlerProcess(handlerProc Process) bool {
-	return proc.event.addHandlerProcess(handlerProc)
+	return proc.ev.addHandlerProcess(handlerProc)
 }
