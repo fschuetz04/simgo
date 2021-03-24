@@ -28,15 +28,16 @@ func (sim *Simulation) Process(runner Runner) Process {
 	sim.mutex.Unlock()
 
 	go func() {
+		// close sync channel at the end, this lets the simulation receive
+		// immediately and is thus a yield to the simulation
+		defer func() { close(proc.sync) }()
+
 		// wait for simulation
 		<-proc.sync
 
 		runner(proc)
 
 		proc.ev.Trigger()
-
-		// yield to simulation
-		proc.sync <- struct{}{}
 	}()
 
 	return proc
