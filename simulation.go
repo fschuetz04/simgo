@@ -13,7 +13,7 @@ type Simulation struct {
 
 type Runner func(proc Process)
 
-func (sim *Simulation) Start(runner Runner) Process {
+func (sim *Simulation) Process(runner Runner) Process {
 	proc := Process{
 		Simulation: sim,
 		ev:         sim.Event(),
