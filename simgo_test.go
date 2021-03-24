@@ -23,7 +23,7 @@ func TestAnyOfEmpty(t *testing.T) {
 	})
 
 	sim.Run()
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestAnyOfTriggered(t *testing.T) {
@@ -41,7 +41,7 @@ func TestAnyOfTriggered(t *testing.T) {
 	})
 
 	sim.Run()
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestAnyOfPending(t *testing.T) {
@@ -58,7 +58,7 @@ func TestAnyOfPending(t *testing.T) {
 	})
 
 	sim.Run()
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestAnyOfProcessed(t *testing.T) {
@@ -77,7 +77,7 @@ func TestAnyOfProcessed(t *testing.T) {
 	})
 
 	sim.Run()
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestAllOfEmpty(t *testing.T) {
@@ -92,7 +92,7 @@ func TestAllOfEmpty(t *testing.T) {
 	})
 
 	sim.Run()
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestAllOfTriggered(t *testing.T) {
@@ -111,7 +111,7 @@ func TestAllOfTriggered(t *testing.T) {
 	})
 
 	sim.Run()
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestAllOfPending(t *testing.T) {
@@ -128,7 +128,7 @@ func TestAllOfPending(t *testing.T) {
 	})
 
 	sim.Run()
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestAllOfProcessed(t *testing.T) {
@@ -148,7 +148,7 @@ func TestAllOfProcessed(t *testing.T) {
 	})
 
 	sim.Run()
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestWaitForProc(t *testing.T) {
@@ -185,7 +185,7 @@ func TestWaitForProcessed(t *testing.T) {
 	})
 
 	sim.Run()
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestRunUntil(t *testing.T) {
@@ -202,7 +202,7 @@ func TestRunUntil(t *testing.T) {
 	})
 
 	sim.RunUntil(5)
-	assertf(t, finished == true, "finished == %t", finished)
+	assertf(t, finished == true, "finished == false")
 }
 
 func TestTriggerDelayedNegative(t *testing.T) {
@@ -217,6 +217,23 @@ func TestTriggerDelayedNegative(t *testing.T) {
 	ev.TriggerDelayed(-5)
 }
 
+func TestTriggerDelayedTriggered(t *testing.T) {
+	sim := Simulation{}
+	finished := false
+
+	sim.Start(func(proc Process) {
+		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
+		ev := proc.Timeout(5)
+		proc.Wait(ev)
+		assertf(t, proc.Now == 5, "proc.Now == %f", proc.Now)
+		assertf(t, ev.TriggerDelayed(5) == false, "ev.TriggerDelayed(5) == true")
+		finished = true
+	})
+
+	sim.Run()
+	assertf(t, finished == true, "finished == false")
+}
+
 func TestRunUntilNegative(t *testing.T) {
 	defer func() {
 		err := recover()
@@ -224,6 +241,7 @@ func TestRunUntilNegative(t *testing.T) {
 	}()
 
 	sim := Simulation{}
+
 	sim.RunUntil(-5)
 }
 
@@ -234,5 +252,31 @@ func TestTimeoutNegative(t *testing.T) {
 	}()
 
 	sim := Simulation{}
+
 	sim.Timeout(-5)
+}
+
+func TestTriggerTriggered(t *testing.T) {
+	sim := Simulation{}
+
+	ev := sim.Event()
+	assertf(t, ev.Trigger() == true, "ev.Trigger() == false")
+	assertf(t, ev.Trigger() == false, "ev.Trigger() == true")
+}
+
+func TestTriggerEarly(t *testing.T) {
+	sim := Simulation{}
+	finished := false
+
+	sim.Start(func(proc Process) {
+		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
+		ev := proc.Timeout(5)
+		ev.Trigger()
+		proc.Wait(ev)
+		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
+		finished = true
+	})
+
+	sim.Run()
+	assertf(t, finished == true, "finished == false")
 }
