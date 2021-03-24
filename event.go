@@ -1,6 +1,6 @@
 package simgo
 
-import "log"
+import "fmt"
 
 type state int
 
@@ -28,7 +28,7 @@ func (ev *Event) Trigger() bool {
 
 func (ev *Event) TriggerDelayed(delay float64) bool {
 	if delay < 0 {
-		log.Fatalf("(*Event).TriggerDelayed: delay must not be negative: %f\n", delay)
+		panic(fmt.Sprintf("(*Event).TriggerDelayed: delay must not be negative: %f\n", delay))
 	}
 
 	if ev.state != pending {

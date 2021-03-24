@@ -1,7 +1,7 @@
 package simgo
 
 import (
-	"log"
+	"fmt"
 	"sync"
 )
 
@@ -48,7 +48,7 @@ func (sim *Simulation) Event() *Event {
 
 func (sim *Simulation) Timeout(delay float64) *Event {
 	if delay < 0 {
-		log.Fatalf("(*Simulation).Timeout: delay must not be negative: %f\n", delay)
+		panic(fmt.Sprintf("(*Simulation).Timeout: delay must not be negative: %f\n", delay))
 	}
 
 	ev := sim.Event()
@@ -110,7 +110,7 @@ func (sim *Simulation) Run() {
 
 func (sim *Simulation) RunUntil(target float64) {
 	if target < 0 {
-		log.Fatalf("(*Simulation).RunUntil: target must not be negative: %f\n", target)
+		panic(fmt.Sprintf("(*Simulation).RunUntil: target must not be negative: %f\n", target))
 	}
 
 	for len(sim.eq) > 0 && sim.eq[0].time <= target {
