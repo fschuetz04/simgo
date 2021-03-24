@@ -16,7 +16,7 @@ func TestAnyOfEmpty(t *testing.T) {
 
 	sim.Start(func(proc Process) {
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
-		proc.Wait(sim.AnyOf())
+		proc.Wait(proc.AnyOf())
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
 	})
 
@@ -27,11 +27,11 @@ func TestAnyOfTriggered(t *testing.T) {
 	sim := Simulation{}
 
 	sim.Start(func(proc Process) {
-		ev1 := sim.Event()
-		ev2 := sim.Event()
+		ev1 := proc.Event()
+		ev2 := proc.Event()
 		ev2.Trigger()
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
-		proc.Wait(sim.AnyOf(ev1, ev2))
+		proc.Wait(proc.AnyOf(ev1, ev2))
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
 	})
 
@@ -43,9 +43,9 @@ func TestAnyOfPending(t *testing.T) {
 
 	sim.Start(func(proc Process) {
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
-		ev1 := sim.Event()
-		ev2 := sim.Timeout(5)
-		proc.Wait(sim.AnyOf(ev1, ev2))
+		ev1 := proc.Event()
+		ev2 := proc.Timeout(5)
+		proc.Wait(proc.AnyOf(ev1, ev2))
 		assertf(t, proc.Now == 5, "proc.Now == %f", proc.Now)
 	})
 
@@ -57,11 +57,11 @@ func TestAnyOfProcessed(t *testing.T) {
 
 	sim.Start(func(proc Process) {
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
-		ev1 := sim.Event()
-		ev2 := sim.Timeout(5)
+		ev1 := proc.Event()
+		ev2 := proc.Timeout(5)
 		proc.Wait(ev2)
 		assertf(t, proc.Now == 5, "proc.Now == %f", proc.Now)
-		proc.Wait(sim.AnyOf(ev1, ev2))
+		proc.Wait(proc.AnyOf(ev1, ev2))
 		assertf(t, proc.Now == 5, "proc.Now == %f", proc.Now)
 	})
 
@@ -73,7 +73,7 @@ func TestAllOfEmpty(t *testing.T) {
 
 	sim.Start(func(proc Process) {
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
-		proc.Wait(sim.AllOf())
+		proc.Wait(proc.AllOf())
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
 	})
 
@@ -85,11 +85,11 @@ func TestAllOfTriggered(t *testing.T) {
 
 	sim.Start(func(proc Process) {
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
-		ev1 := sim.Event()
+		ev1 := proc.Event()
 		ev1.Trigger()
-		ev2 := sim.Event()
+		ev2 := proc.Event()
 		ev2.Trigger()
-		proc.Wait(sim.AllOf(ev1, ev2))
+		proc.Wait(proc.AllOf(ev1, ev2))
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
 	})
 
@@ -101,9 +101,9 @@ func TestAllOfPending(t *testing.T) {
 
 	sim.Start(func(proc Process) {
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
-		ev1 := sim.Timeout(10)
-		ev2 := sim.Timeout(5)
-		proc.Wait(sim.AllOf(ev1, ev2))
+		ev1 := proc.Timeout(10)
+		ev2 := proc.Timeout(5)
+		proc.Wait(proc.AllOf(ev1, ev2))
 		assertf(t, proc.Now == 10, "proc.Now == %f", proc.Now)
 	})
 
@@ -115,12 +115,12 @@ func TestAllOfProcessed(t *testing.T) {
 
 	sim.Start(func(proc Process) {
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
-		ev1 := sim.Event()
+		ev1 := proc.Event()
 		ev1.Trigger()
-		ev2 := sim.Timeout(5)
+		ev2 := proc.Timeout(5)
 		proc.Wait(ev1)
 		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
-		proc.Wait(sim.AllOf(ev1, ev2))
+		proc.Wait(proc.AllOf(ev1, ev2))
 		assertf(t, proc.Now == 5, "proc.Now == %f", proc.Now)
 	})
 
