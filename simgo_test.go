@@ -188,6 +188,23 @@ func TestWaitForProcessed(t *testing.T) {
 	assertf(t, finished == true, "finished == false")
 }
 
+func TestWaitForAborted(t *testing.T) {
+	sim := Simulation{}
+	finished := false
+
+	sim.Process(func(proc Process) {
+		assertf(t, proc.Now == 0, "proc.Now == %f", proc.Now)
+		ev := proc.Event()
+		ev.Abort()
+		finished = true
+		proc.Wait(ev)
+		t.Error("Process was executed too far")
+	})
+
+	sim.Run()
+	assertf(t, finished == true, "finished == false")
+}
+
 func TestRunUntil(t *testing.T) {
 	sim := Simulation{}
 	finished := false
@@ -256,6 +273,14 @@ func TestTimeoutNegative(t *testing.T) {
 	sim.Timeout(-5)
 }
 
+func TestTrigger(t *testing.T) {
+	sim := Simulation{}
+
+	ev := sim.Event()
+	ev.Trigger()
+	assertf(t, ev.Triggered() == true, "ev.Pending() == false")
+}
+
 func TestTriggerTriggered(t *testing.T) {
 	sim := Simulation{}
 
@@ -279,4 +304,22 @@ func TestTriggerEarly(t *testing.T) {
 
 	sim.Run()
 	assertf(t, finished == true, "finished == false")
+}
+
+func TestAbort(t *testing.T) {
+	sim := Simulation{}
+
+	ev := sim.Event()
+	ev.Abort()
+	assertf(t, ev.Aborted() == true, "ev.Aborted() == false")
+}
+
+func TestAbortTriggered(t *testing.T) {
+	sim := Simulation{}
+
+	ev := sim.Event()
+	assertf(t, ev.Trigger() == true, "ev.Trigger() == false")
+	assertf(t, ev.Triggered() == true, "ev.Triggered() == false")
+	assertf(t, ev.Abort() == false, "ev.Abort() == true")
+	assertf(t, ev.Aborted() == false, "ev.Aborted() == true")
 }

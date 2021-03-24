@@ -68,7 +68,7 @@ func (ev *Event) Aborted() bool {
 }
 
 func (ev *Event) process() {
-	if !ev.Pending() && !ev.Triggered() {
+	if ev.Processed() || ev.Aborted() {
 		return
 	}
 
