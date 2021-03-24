@@ -81,21 +81,17 @@ func (ev *Event) process() {
 	ev.handlers = nil
 }
 
-func (ev *Event) addHandler(handler func()) bool {
-	if ev.Processed() {
-		return false
-	}
-
-	if ev.Aborted() {
-		return true
+func (ev *Event) addHandler(handler func()) {
+	if ev.Processed() || ev.Aborted() {
+		// event will not be processed (again), do not store handler
+		return
 	}
 
 	ev.handlers = append(ev.handlers, handler)
-	return true
 }
 
-func (ev *Event) addHandlerProcess(proc Process) bool {
-	return ev.addHandler(func() {
+func (ev *Event) addHandlerProcess(proc Process) {
+	ev.addHandler(func() {
 		// yield to process
 		proc.sync <- struct{}{}
 
