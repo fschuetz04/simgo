@@ -16,7 +16,7 @@ type Runner func(proc Process)
 func (sim *Simulation) Start(runner Runner) Process {
 	proc := Process{
 		Simulation: sim,
-		Event:      sim.Event(),
+		event:      sim.Event(),
 		sync:       make(chan struct{}),
 	}
 
@@ -33,7 +33,7 @@ func (sim *Simulation) Start(runner Runner) Process {
 
 		runner(proc)
 
-		proc.Trigger()
+		proc.event.Trigger()
 
 		// yield to simulation
 		proc.sync <- struct{}{}

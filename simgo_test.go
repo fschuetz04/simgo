@@ -105,3 +105,18 @@ func TestAllOfPending(t *testing.T) {
 
 	sim.Run()
 }
+
+func TestWaitForProc(t *testing.T) {
+	sim := Simulation{}
+
+	proc1 := sim.Start(func(proc Process) {
+		proc.Wait(proc.Timeout(5))
+	})
+
+	sim.Start(func(proc Process) {
+		proc.Wait(proc1)
+		assertf(t, proc.Now == 5, "proc.Now == %f", proc.Now)
+	})
+
+	sim.Run()
+}
