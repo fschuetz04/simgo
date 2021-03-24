@@ -12,7 +12,7 @@ type Process struct {
 
 func (proc Process) Wait(ev awaitable) {
 	if !ev.addHandlerProcess(proc) {
-		// event was not pending
+		// event was already processed
 		return
 	}
 

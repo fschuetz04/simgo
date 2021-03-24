@@ -18,7 +18,7 @@ type Event struct {
 }
 
 func (ev *Event) Trigger() bool {
-	if ev.state != pending {
+	if !ev.Pending() {
 		return false
 	}
 
@@ -32,7 +32,7 @@ func (ev *Event) TriggerDelayed(delay float64) bool {
 		panic(fmt.Sprintf("(*Event).TriggerDelayed: delay must not be negative: %f\n", delay))
 	}
 
-	if ev.state != pending {
+	if !ev.Pending() {
 		return false
 	}
 
@@ -41,16 +41,34 @@ func (ev *Event) TriggerDelayed(delay float64) bool {
 }
 
 func (ev *Event) Abort() bool {
-	if ev.state != pending {
+	if !ev.Pending() {
 		return false
 	}
 
 	ev.state = aborted
+	ev.handlers = nil
+
 	return true
 }
 
+func (ev *Event) Pending() bool {
+	return ev.state == pending
+}
+
+func (ev *Event) Triggered() bool {
+	return ev.state == triggered || ev.Processed()
+}
+
+func (ev *Event) Processed() bool {
+	return ev.state == processed
+}
+
+func (ev *Event) Aborted() bool {
+	return ev.state == aborted
+}
+
 func (ev *Event) process() {
-	if ev.state == processed {
+	if !ev.Pending() && !ev.Triggered() {
 		return
 	}
 
@@ -59,11 +77,17 @@ func (ev *Event) process() {
 	for _, handler := range ev.handlers {
 		handler()
 	}
+
+	ev.handlers = nil
 }
 
 func (ev *Event) addHandler(handler func()) bool {
-	if ev.state == processed {
+	if ev.Processed() {
 		return false
+	}
+
+	if ev.Aborted() {
+		return true
 	}
 
 	ev.handlers = append(ev.handlers, handler)

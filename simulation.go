@@ -65,7 +65,7 @@ func (sim *Simulation) AnyOf(evs ...*Event) *Event {
 	}
 
 	for _, ev := range evs {
-		if ev.state == processed {
+		if ev.Processed() {
 			anyOf.Trigger()
 			return anyOf
 		}
@@ -83,7 +83,7 @@ func (sim *Simulation) AllOf(evs ...*Event) *Event {
 	n := len(evs)
 
 	for _, ev := range evs {
-		if ev.state == processed {
+		if ev.Processed() {
 			n--
 		}
 	}
