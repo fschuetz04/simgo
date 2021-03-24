@@ -58,14 +58,21 @@ func (sim *Simulation) Timeout(delay float64) *Event {
 
 func (sim *Simulation) AnyOf(evs ...*Event) *Event {
 	anyOf := sim.Event()
-	handler := func() { anyOf.Trigger() }
+
+	if len(evs) == 0 {
+		anyOf.Trigger()
+		return anyOf
+	}
 
 	for _, ev := range evs {
-		if !ev.addHandler(handler) {
-			// event is already processed
+		if ev.state == processed {
 			anyOf.Trigger()
 			return anyOf
 		}
+	}
+
+	for _, ev := range evs {
+		ev.addHandler(func() { anyOf.Trigger() })
 	}
 
 	return anyOf
@@ -74,18 +81,25 @@ func (sim *Simulation) AnyOf(evs ...*Event) *Event {
 func (sim *Simulation) AllOf(evs ...*Event) *Event {
 	allOf := sim.Event()
 	n := len(evs)
-	handler := func() {
-		n--
-		if n == 0 {
-			allOf.Trigger()
+
+	for _, ev := range evs {
+		if ev.state == processed {
+			n--
 		}
 	}
 
+	if n == 0 {
+		allOf.Trigger()
+		return allOf
+	}
+
 	for _, ev := range evs {
-		if !ev.addHandler(handler) {
-			// event is already processed
+		ev.addHandler(func() {
 			n--
-		}
+			if n == 0 {
+				allOf.Trigger()
+			}
+		})
 	}
 
 	return allOf
