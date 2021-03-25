@@ -5,6 +5,7 @@ package simgo
 
 import (
 	"fmt"
+	"reflect"
 	"sync"
 )
 
@@ -44,6 +45,19 @@ func (sim *Simulation) Process(runner Runner) Process {
 	}()
 
 	return proc
+}
+
+func (sim *Simulation) ProcessReflect(runner interface{}, args ...interface{}) Process {
+	return sim.Process(func(proc Process) {
+		reflectF := reflect.ValueOf(runner)
+		reflectArgs := make([]reflect.Value, len(args)+1)
+		reflectArgs[0] = reflect.ValueOf(proc)
+		for i, arg := range args {
+			expected := reflectF.Type().In(i + 1)
+			reflectArgs[i+1] = reflect.ValueOf(arg).Convert(expected)
+		}
+		reflectF.Call(reflectArgs)
+	})
 }
 
 func (sim *Simulation) Event() *Event {
