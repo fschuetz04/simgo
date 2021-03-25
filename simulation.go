@@ -41,12 +41,7 @@ func (sim *Simulation) Process(runner Runner) Process {
 		defer close(proc.sync)
 
 		// wait for simulation
-		ok := <-proc.sync
-
-		if !ok {
-			// event was finalized and will not be processed, exit process
-			runtime.Goexit()
-		}
+		<-proc.sync
 
 		runner(proc)
 
@@ -72,9 +67,7 @@ func (sim *Simulation) ProcessReflect(runner interface{}, args ...interface{}) P
 func (sim *Simulation) Event() *Event {
 	ev := &Event{sim: sim}
 	runtime.SetFinalizer(ev, func(ev *Event) {
-		for _, proc := range ev.handlers {
-			proc.sync <- false
-		}
+		ev.Abort()
 	})
 	return ev
 }

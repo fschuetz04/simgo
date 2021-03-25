@@ -26,7 +26,7 @@ func (proc Process) Wait(ev awaitable) {
 	}
 
 	if ev.Aborted() {
-		// event will not be processed, exit process
+		// event aborted, exit process
 		runtime.Goexit()
 	}
 
@@ -37,10 +37,10 @@ func (proc Process) Wait(ev awaitable) {
 	proc.sync <- true
 
 	// wait for simulation
-	ok := <-proc.sync
+	processed := <-proc.sync
 
-	if !ok {
-		// event was finalized and will not be processed, exit process
+	if !processed {
+		// event aborted, exit process
 		runtime.Goexit()
 	}
 }

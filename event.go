@@ -49,6 +49,12 @@ func (ev *Event) Abort() bool {
 	}
 
 	ev.state = aborted
+
+	for _, proc := range ev.handlers {
+		// abort process
+		proc.sync <- false
+	}
+
 	ev.handlers = nil
 
 	return true
