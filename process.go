@@ -10,13 +10,13 @@ type awaitable interface {
 	Triggered() bool
 	Processed() bool
 	Aborted() bool
-	addHandlerProcess(proc Process)
+	addHandler(proc Process)
 }
 
 type Process struct {
 	*Simulation
 	ev   *Event
-	sync chan struct{}
+	sync chan bool
 }
 
 func (proc Process) Wait(ev awaitable) {
@@ -31,13 +31,18 @@ func (proc Process) Wait(ev awaitable) {
 	}
 
 	// resume this process when the event is processed
-	ev.addHandlerProcess(proc)
+	ev.addHandler(proc)
 
 	// yield to simulation
-	proc.sync <- struct{}{}
+	proc.sync <- true
 
 	// wait for simulation
-	<-proc.sync
+	ok := <-proc.sync
+
+	if !ok {
+		// event was finalized and will not be processed, exit process
+		runtime.Goexit()
+	}
 }
 
 func (proc Process) Pending() bool {
@@ -56,6 +61,6 @@ func (proc Process) Aborted() bool {
 	return proc.ev.Aborted()
 }
 
-func (proc Process) addHandlerProcess(handlerProc Process) {
-	proc.ev.addHandlerProcess(handlerProc)
+func (proc Process) addHandler(handlerProc Process) {
+	proc.ev.addHandler(handlerProc)
 }

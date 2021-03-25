@@ -6,6 +6,7 @@ package simgo
 import (
 	"fmt"
 	"reflect"
+	"runtime"
 	"sync"
 )
 
@@ -25,23 +26,27 @@ func (sim *Simulation) Process(runner Runner) Process {
 	proc := Process{
 		Simulation: sim,
 		ev:         sim.Event(),
-		sync:       make(chan struct{}),
+		sync:       make(chan bool),
 	}
 
 	ev := sim.Event()
-	ev.addHandlerProcess(proc)
+	ev.addHandler(proc)
 
 	sim.mutex.Lock()
 	ev.Trigger()
 	sim.mutex.Unlock()
 
 	go func() {
-		// close sync channel at the end, this lets the simulation receive
-		// immediately and is thus a yield to the simulation
-		defer func() { close(proc.sync) }()
+		// yield to the simulation at the end by closing
+		defer close(proc.sync)
 
 		// wait for simulation
-		<-proc.sync
+		ok := <-proc.sync
+
+		if !ok {
+			// event was finalized and will not be processed, exit process
+			runtime.Goexit()
+		}
 
 		runner(proc)
 
@@ -65,7 +70,13 @@ func (sim *Simulation) ProcessReflect(runner interface{}, args ...interface{}) P
 }
 
 func (sim *Simulation) Event() *Event {
-	return &Event{sim: sim}
+	ev := &Event{sim: sim}
+	runtime.SetFinalizer(ev, func(ev *Event) {
+		for _, proc := range ev.handlers {
+			proc.sync <- false
+		}
+	})
+	return ev
 }
 
 func (sim *Simulation) Timeout(delay float64) *Event {
@@ -79,50 +90,58 @@ func (sim *Simulation) Timeout(delay float64) *Event {
 }
 
 func (sim *Simulation) AnyOf(evs ...*Event) *Event {
+	// TODO
+
 	anyOf := sim.Event()
 
-	if len(evs) == 0 {
-		anyOf.Trigger()
-		return anyOf
-	}
-
-	for _, ev := range evs {
-		if ev.Processed() {
+	/*
+		if len(evs) == 0 {
 			anyOf.Trigger()
 			return anyOf
 		}
-	}
 
-	for _, ev := range evs {
-		ev.addHandler(func() { anyOf.Trigger() })
-	}
+		for _, ev := range evs {
+			if ev.Processed() {
+				anyOf.Trigger()
+				return anyOf
+			}
+		}
+
+		for _, ev := range evs {
+			ev.addHandler(func() { anyOf.Trigger() })
+		}
+	*/
 
 	return anyOf
 }
 
 func (sim *Simulation) AllOf(evs ...*Event) *Event {
+	// TODO
+
 	allOf := sim.Event()
-	n := len(evs)
+	// n := len(evs)
 
-	for _, ev := range evs {
-		if ev.Processed() {
-			n--
-		}
-	}
-
-	if n == 0 {
-		allOf.Trigger()
-		return allOf
-	}
-
-	for _, ev := range evs {
-		ev.addHandler(func() {
-			n--
-			if n == 0 {
-				allOf.Trigger()
+	/*
+		for _, ev := range evs {
+			if ev.Processed() {
+				n--
 			}
-		})
-	}
+		}
+
+		if n == 0 {
+			allOf.Trigger()
+			return allOf
+		}
+
+		for _, ev := range evs {
+			ev.addHandler(func() {
+				n--
+				if n == 0 {
+					allOf.Trigger()
+				}
+			})
+		}
+	*/
 
 	return allOf
 }
