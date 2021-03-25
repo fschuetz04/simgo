@@ -10,12 +10,16 @@ import (
 )
 
 type Simulation struct {
-	Now   float64
+	now   float64
 	eq    eventQueue
 	mutex sync.Mutex
 }
 
 type Runner func(proc Process)
+
+func (sim *Simulation) Now() float64 {
+	return sim.now
+}
 
 func (sim *Simulation) Process(runner Runner) Process {
 	proc := Process{
@@ -129,7 +133,7 @@ func (sim *Simulation) Step() bool {
 	}
 
 	qe := sim.eq.dequeue()
-	sim.Now = qe.time
+	sim.now = qe.time
 	qe.event.process()
 
 	return true
@@ -149,10 +153,10 @@ func (sim *Simulation) RunUntil(target float64) {
 		sim.Step()
 	}
 
-	sim.Now = target
+	sim.now = target
 }
 
 func (sim *Simulation) schedule(ev *Event, delay float64) {
-	time := sim.Now + delay
+	time := sim.Now() + delay
 	sim.eq.queue(ev, time)
 }
