@@ -45,12 +45,28 @@ func (proc Process) Wait(ev awaitable) {
 	}
 }
 
+func (proc Process) Pending() bool {
+	return proc.ev.Pending()
+}
+
+func (proc Process) Triggered() bool {
+	return proc.ev.Triggered()
+}
+
 func (proc Process) Processed() bool {
 	return proc.ev.Processed()
 }
 
 func (proc Process) Aborted() bool {
 	return proc.ev.Aborted()
+}
+
+func (proc Process) AddHandler(handler Handler) {
+	proc.ev.AddHandler(handler)
+}
+
+func (proc Process) AddAbortHandler(handler Handler) {
+	proc.ev.AddAbortHandler(handler)
 }
 
 func (proc Process) addProcess(otherProc Process) {
