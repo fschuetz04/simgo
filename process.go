@@ -6,11 +6,9 @@ package simgo
 import "runtime"
 
 type awaitable interface {
-	Pending() bool
-	Triggered() bool
 	Processed() bool
 	Aborted() bool
-	addHandler(proc Process)
+	addProcess(proc Process)
 }
 
 type Process struct {
@@ -31,8 +29,8 @@ func (proc Process) Wait(ev awaitable) {
 		runtime.Goexit()
 	}
 
-	// resume this process when the event is processed
-	ev.addHandler(proc)
+	// yield to this process when the event is processed
+	ev.addProcess(proc)
 
 	// yield to simulation
 	proc.sync <- true
@@ -47,14 +45,6 @@ func (proc Process) Wait(ev awaitable) {
 	}
 }
 
-func (proc Process) Pending() bool {
-	return proc.ev.Pending()
-}
-
-func (proc Process) Triggered() bool {
-	return proc.ev.Triggered()
-}
-
 func (proc Process) Processed() bool {
 	return proc.ev.Processed()
 }
@@ -63,6 +53,6 @@ func (proc Process) Aborted() bool {
 	return proc.ev.Aborted()
 }
 
-func (proc Process) addHandler(handlerProc Process) {
-	proc.ev.addHandler(handlerProc)
+func (proc Process) addProcess(otherProc Process) {
+	proc.ev.addProcess(otherProc)
 }

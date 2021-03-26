@@ -29,8 +29,9 @@ func (sim *Simulation) Process(runner Runner) Process {
 		sync:       make(chan bool),
 	}
 
+	// yield to the process when the event is triggered
 	ev := sim.Event()
-	ev.addHandler(proc)
+	ev.addProcess(proc)
 
 	sim.mutex.Lock()
 	ev.Trigger()
@@ -83,58 +84,52 @@ func (sim *Simulation) Timeout(delay float64) *Event {
 }
 
 func (sim *Simulation) AnyOf(evs ...*Event) *Event {
-	// TODO
+	if len(evs) == 0 {
+		return sim.Timeout(0)
+	}
+
+	for _, ev := range evs {
+		if ev.Processed() {
+			return sim.Timeout(0)
+		}
+	}
 
 	anyOf := sim.Event()
 
-	/*
-		if len(evs) == 0 {
-			anyOf.Trigger()
-			return anyOf
-		}
-
-		for _, ev := range evs {
-			if ev.Processed() {
-				anyOf.Trigger()
-				return anyOf
-			}
-		}
-
-		for _, ev := range evs {
-			ev.addHandler(func() { anyOf.Trigger() })
-		}
-	*/
+	for _, ev := range evs {
+		ev.AddHandler(func(ev *Event) { anyOf.Trigger() })
+	}
 
 	return anyOf
 }
 
 func (sim *Simulation) AllOf(evs ...*Event) *Event {
-	// TODO
+	n := len(evs)
+
+	for _, ev := range evs {
+		if ev.Processed() {
+			n--
+		}
+	}
+
+	if n == 0 {
+		return sim.Timeout(0)
+	}
 
 	allOf := sim.Event()
-	// n := len(evs)
 
-	/*
-		for _, ev := range evs {
-			if ev.Processed() {
-				n--
+	for _, ev := range evs {
+		ev.AddHandler(func(ev *Event) {
+			n--
+			if n == 0 {
+				allOf.Trigger()
 			}
-		}
+		})
 
-		if n == 0 {
-			allOf.Trigger()
-			return allOf
-		}
-
-		for _, ev := range evs {
-			ev.addHandler(func() {
-				n--
-				if n == 0 {
-					allOf.Trigger()
-				}
-			})
-		}
-	*/
+		ev.AddAbortHandler(func(ev *Event) {
+			allOf.Abort()
+		})
+	}
 
 	return allOf
 }

@@ -14,10 +14,14 @@ const (
 	aborted
 )
 
+type Handler func(ev *Event)
+
 type Event struct {
-	sim      *Simulation
-	state    state
-	handlers []Process
+	sim           *Simulation
+	state         state
+	procs         []Process
+	handlers      []Handler
+	abortHandlers []Handler
 }
 
 func (ev *Event) Trigger() bool {
@@ -50,12 +54,19 @@ func (ev *Event) Abort() bool {
 
 	ev.state = aborted
 
-	for _, proc := range ev.handlers {
+	for _, proc := range ev.procs {
 		// abort process
 		proc.sync <- false
 	}
 
+	ev.procs = nil
+
+	for _, handler := range ev.abortHandlers {
+		handler(ev)
+	}
+
 	ev.handlers = nil
+	ev.abortHandlers = nil
 
 	return true
 }
@@ -76,6 +87,24 @@ func (ev *Event) Aborted() bool {
 	return ev.state == aborted
 }
 
+func (ev *Event) AddHandler(handler Handler) {
+	if ev.Processed() || ev.Aborted() {
+		// event will not be processed (again), do not store handler
+		return
+	}
+
+	ev.handlers = append(ev.handlers, handler)
+}
+
+func (ev *Event) AddAbortHandler(handler Handler) {
+	if ev.Processed() || ev.Aborted() {
+		// event will not be processed (again), do not store handler
+		return
+	}
+
+	ev.abortHandlers = append(ev.abortHandlers, handler)
+}
+
 func (ev *Event) process() {
 	if ev.Processed() || ev.Aborted() {
 		return
@@ -83,7 +112,7 @@ func (ev *Event) process() {
 
 	ev.state = processed
 
-	for _, proc := range ev.handlers {
+	for _, proc := range ev.procs {
 		// yield to process
 		proc.sync <- true
 
@@ -91,14 +120,21 @@ func (ev *Event) process() {
 		<-proc.sync
 	}
 
+	ev.procs = nil
+
+	for _, handler := range ev.handlers {
+		handler(ev)
+	}
+
 	ev.handlers = nil
+	ev.abortHandlers = nil
 }
 
-func (ev *Event) addHandler(proc Process) {
+func (ev *Event) addProcess(proc Process) {
 	if ev.Processed() || ev.Aborted() {
-		// event will not be processed (again), do not store handler
+		// event will not be processed (again), do not store process
 		return
 	}
 
-	ev.handlers = append(ev.handlers, proc)
+	ev.procs = append(ev.procs, proc)
 }
