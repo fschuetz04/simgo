@@ -27,6 +27,7 @@ func (proc Process) Wait(ev awaitable) {
 
 	if ev.Aborted() {
 		// event aborted, exit process
+		proc.ev.Abort()
 		runtime.Goexit()
 	}
 
@@ -41,6 +42,7 @@ func (proc Process) Wait(ev awaitable) {
 
 	if !processed {
 		// event aborted, exit process
+		proc.ev.Abort()
 		runtime.Goexit()
 	}
 }
