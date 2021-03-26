@@ -4,6 +4,7 @@
 package simgo
 
 import (
+	"runtime"
 	"testing"
 )
 
@@ -20,7 +21,9 @@ func TestAnyOfEmpty(t *testing.T) {
 
 	sim.Process(func(proc Process) {
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
-		proc.Wait(proc.AnyOf())
+		anyOf := proc.AnyOf()
+		runtime.GC()
+		proc.Wait(anyOf)
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
 		finished = true
 	})
@@ -34,11 +37,13 @@ func TestAnyOfTriggered(t *testing.T) {
 	finished := false
 
 	sim.Process(func(proc Process) {
+		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
 		ev1 := proc.Event()
 		ev2 := proc.Event()
 		ev2.Trigger()
-		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
-		proc.Wait(proc.AnyOf(ev1, ev2))
+		anyOf := proc.AnyOf(ev1, ev2)
+		runtime.GC()
+		proc.Wait(anyOf)
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
 		finished = true
 	})
@@ -55,7 +60,9 @@ func TestAnyOfPending(t *testing.T) {
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
 		ev1 := proc.Event()
 		ev2 := proc.Timeout(5)
-		proc.Wait(proc.AnyOf(ev1, ev2))
+		anyOf := proc.AnyOf(ev1, ev2)
+		runtime.GC()
+		proc.Wait(anyOf)
 		assertf(t, proc.Now() == 5, "proc.Now() == %f", proc.Now())
 		finished = true
 	})
@@ -74,7 +81,9 @@ func TestAnyOfProcessed(t *testing.T) {
 		ev2 := proc.Timeout(5)
 		proc.Wait(ev2)
 		assertf(t, proc.Now() == 5, "proc.Now() == %f", proc.Now())
-		proc.Wait(proc.AnyOf(ev1, ev2))
+		anyOf := proc.AnyOf(ev1, ev2)
+		runtime.GC()
+		proc.Wait(anyOf)
 		assertf(t, proc.Now() == 5, "proc.Now() == %f", proc.Now())
 		finished = true
 	})
@@ -89,7 +98,9 @@ func TestAllOfEmpty(t *testing.T) {
 
 	sim.Process(func(proc Process) {
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
-		proc.Wait(proc.AllOf())
+		allOf := proc.AllOf()
+		runtime.GC()
+		proc.Wait(allOf)
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
 		finished = true
 	})
@@ -108,7 +119,9 @@ func TestAllOfTriggered(t *testing.T) {
 		ev1.Trigger()
 		ev2 := proc.Event()
 		ev2.Trigger()
-		proc.Wait(proc.AllOf(ev1, ev2))
+		allOf := proc.AllOf(ev1, ev2)
+		runtime.GC()
+		proc.Wait(allOf)
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
 		finished = true
 	})
@@ -125,7 +138,9 @@ func TestAllOfPending(t *testing.T) {
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
 		ev1 := proc.Timeout(10)
 		ev2 := proc.Timeout(5)
-		proc.Wait(proc.AllOf(ev1, ev2))
+		allOf := proc.AllOf(ev1, ev2)
+		runtime.GC()
+		proc.Wait(allOf)
 		assertf(t, proc.Now() == 10, "proc.Now() == %f", proc.Now())
 		finished = true
 	})
@@ -145,7 +160,9 @@ func TestAllOfProcessed(t *testing.T) {
 		ev2 := proc.Timeout(5)
 		proc.Wait(ev1)
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
-		proc.Wait(proc.AllOf(ev1, ev2))
+		allOf := proc.AllOf(ev1, ev2)
+		runtime.GC()
+		proc.Wait(allOf)
 		assertf(t, proc.Now() == 5, "proc.Now() == %f", proc.Now())
 		finished = true
 	})
