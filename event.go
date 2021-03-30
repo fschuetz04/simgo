@@ -57,6 +57,9 @@ func (ev *Event) Abort() bool {
 	for _, proc := range ev.procs {
 		// abort process
 		proc.sync <- false
+
+		// wait for process
+		<-proc.sync
 	}
 
 	ev.procs = nil
