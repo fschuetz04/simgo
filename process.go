@@ -13,7 +13,7 @@ import "runtime"
 // To start a process, use (*Simulation).Process or
 // (*Simulation).ProcessReflect:
 //
-//     func myProcess (proc Process) {
+//     func myProcess (proc simgo.Process) {
 //         fmt.Println("Start")
 //         proc.Wait(proc.Timeout(5))
 //         fmt.Println("End")

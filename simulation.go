@@ -14,7 +14,7 @@ import (
 //
 // To create a new simulation, use the default struct:
 //
-//     sim := Simulation{}
+//     sim := simgo.Simulation{}
 //     sim.Process(myProcess)
 //     sim.Run()
 type Simulation struct {
