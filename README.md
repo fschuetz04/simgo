@@ -34,6 +34,21 @@ func main() {
 }
 ```
 
+When run, the following output is generated:
+
+```
+fast 0
+slow 0
+fast 0.5
+slow 1
+fast 1
+fast 1.5
+slow 2
+fast 2
+```
+
+You can find more examples in the `examples` directory.
+
 ## Copyright and License
 
 Copyright © 2021 Felix Schütz.
