@@ -4,19 +4,20 @@
 package simgo
 
 import (
+	"container/heap"
 	"fmt"
 	"reflect"
 	"runtime"
 )
 
-// Simulation holds the current simulation time and the event queue.
+// Simulation runs a discrete-event simulation.
 type Simulation struct {
+	// now holds the current simulation time.
 	now float64
-	eq  eventQueue
-}
 
-// Runner executes a process in the simulation.
-type Runner func(proc Process)
+	// eq holds the event queue.
+	eq eventQueue
+}
 
 // Now returns the current simulation time.
 func (sim *Simulation) Now() float64 {
@@ -29,19 +30,27 @@ func (sim *Simulation) Now() float64 {
 // runner is executed. Whenever the runner waits for a pending event, it is
 // paused until the event is processed.
 //
+// It is ensured that only one process is executed at the same time.
+//
 // Returns the process. This can be used to wait for the process to finish. As
 // soon as the process finishes, the underlying event is triggered.
-func (sim *Simulation) Process(runner Runner) Process {
+func (sim *Simulation) Process(runner func(proc Process)) Process {
 	proc := Process{
 		Simulation: sim,
 		ev:         sim.Event(),
 		sync:       make(chan bool),
 	}
 
-	// schedule an event to be processed immediately
-	// yield to the process when the event is processed
+	// schedule an event to be processed immediately and add an handler which
+	// is called when the event is processed
 	ev := sim.Timeout(0)
-	ev.addProcess(proc)
+	ev.AddHandler(func(*Event) {
+		// yield to the process
+		proc.sync <- true
+
+		// wait for the process
+		<-proc.sync
+	})
 
 	go func() {
 		// yield to the simulation at the end by closing
@@ -88,6 +97,8 @@ func (sim *Simulation) Event() *Event {
 
 // Timeout creates and returns a pending event which is processed after the
 // given delay.
+//
+// Panics if the given delay is negative.
 func (sim *Simulation) Timeout(delay float64) *Event {
 	if delay < 0 {
 		panic(fmt.Sprintf("(*Simulation).Timeout: delay must not be negative: %f\n", delay))
@@ -100,7 +111,7 @@ func (sim *Simulation) Timeout(delay float64) *Event {
 
 // AnyOf creates and returns a pending event which is triggered when any of the
 // given events is processed.
-func (sim *Simulation) AnyOf(evs ...*Event) *Event {
+func (sim *Simulation) AnyOf(evs ...Awaitable) *Event {
 	// if no events are given, the returned event is immediately triggered
 	if len(evs) == 0 {
 		return sim.Timeout(0)
@@ -127,7 +138,7 @@ func (sim *Simulation) AnyOf(evs ...*Event) *Event {
 
 // AllOf creates and returns a pending event which is triggered when all of the
 // given events are processed.
-func (sim *Simulation) AllOf(evs ...*Event) *Event {
+func (sim *Simulation) AllOf(evs ...Awaitable) *Event {
 	n := len(evs)
 
 	// check how many events are already processed
@@ -173,9 +184,9 @@ func (sim *Simulation) Step() bool {
 		return false
 	}
 
-	qe := sim.eq.dequeue()
+	qe := heap.Pop(&sim.eq).(queuedEvent)
 	sim.now = qe.time
-	qe.event.process()
+	qe.ev.process()
 
 	return true
 }
@@ -189,9 +200,11 @@ func (sim *Simulation) Run() {
 // RunUntil runs the simulation until the event queue is empty or the next event
 // in the event queue is scheduled after the given target time. Sets the current
 // simulation time to the target time at the end.
+//
+// Panics if the given target time is smaller than the current simulation time.
 func (sim *Simulation) RunUntil(target float64) {
-	if target < 0 {
-		panic(fmt.Sprintf("(*Simulation).RunUntil: target must not be negative: %f\n", target))
+	if target < sim.Now() {
+		panic(fmt.Sprintf("(*Simulation).RunUntil: target must not be smaller than the current simulation time: %f < %f\n", target, sim.Now()))
 	}
 
 	for len(sim.eq) > 0 && sim.eq[0].time <= target {
@@ -204,6 +217,8 @@ func (sim *Simulation) RunUntil(target float64) {
 // schedule schedules the given event to be processed after the given delay.
 // Adds the event to the event queue.
 func (sim *Simulation) schedule(ev *Event, delay float64) {
-	time := sim.Now() + delay
-	sim.eq.queue(ev, time)
+	heap.Push(&sim.eq, queuedEvent{
+		ev:   ev,
+		time: sim.Now() + delay,
+	})
 }
