@@ -6,6 +6,21 @@ package simgo
 import "runtime"
 
 // Process is a process in a discrete-event simulation.
+//
+// A process can wait for events and other processes, create new events and
+// start new processes.
+//
+// To start a process, use (*Simulation).Process or
+// (*Simulation).ProcessReflect:
+//
+//     func myProcess (proc Process) {
+//         fmt.Println("Start")
+//         proc.Wait(proc.Timeout(5))
+//         fmt.Println("End")
+//     }
+//     sim.Process(myProcess)
+//
+// Process encapsulates *Simulation, so all its methods can be used.
 type Process struct {
 	// Simulation is used to generate timeouts and other events, and start new
 	// processes.

@@ -34,6 +34,14 @@ type Handler func(ev *Event)
 
 // Event is an event in a discrete-event simulation. The event does not contain
 // information about whether it is scheduled to be processed.
+//
+// To create a new event, use (*Simulation).Timeout, (*Simulation).Event,
+// (*Simulation).AnyOf, or (*Simulation).AllOf:
+//
+//     ev1 := sim.Event()
+//     ev2 := sim.Timeout(5)
+//     ev3 := sim.AnyOf(ev1, ev2)
+//     ev4 := sim.AllOf(ev1, ev2)
 type Event struct {
 	// sim is used to schedule the event to be processed.
 	sim *Simulation

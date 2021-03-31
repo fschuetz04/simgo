@@ -11,6 +11,12 @@ import (
 )
 
 // Simulation runs a discrete-event simulation.
+//
+// To create a new simulation, use the default struct:
+//
+//     sim := Simulation{}
+//     sim.Process(myProcess)
+//     sim.Run()
 type Simulation struct {
 	// now holds the current simulation time.
 	now float64
