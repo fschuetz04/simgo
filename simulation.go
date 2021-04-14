@@ -23,6 +23,9 @@ type Simulation struct {
 
 	// eq holds the event queue.
 	eq eventQueue
+
+	// nextID holds the next ID for scheduling a new event.
+	nextID uint64
 }
 
 // Now returns the current simulation time.
@@ -226,5 +229,7 @@ func (sim *Simulation) schedule(ev *Event, delay float64) {
 	heap.Push(&sim.eq, queuedEvent{
 		ev:   ev,
 		time: sim.Now() + delay,
+		id:   sim.nextID,
 	})
+	sim.nextID++
 }

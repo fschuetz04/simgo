@@ -5,15 +5,16 @@ package simgo
 
 // queuedEvent is an event which is scheduled to be processed at a particular
 // time.
-//
-// TODO(fschuetz04): Potentially add an ID to each queuedEvent to sort events
-// scheduled at the sime time by which one was scheduled first.
 type queuedEvent struct {
 	// ev is the scheduled event.
 	ev *Event
 
 	// time is the time at which the event will be processed.
 	time float64
+
+	// id is an incremental ID to sort events scheduled at the same time by
+	// insertion order.
+	id uint64
 }
 
 // eventQueue holds all scheduled events for a discrete-event simulation.
@@ -27,7 +28,11 @@ func (eq eventQueue) Len() int {
 // Less returns whether the event at position i is scheduled before the event
 // at position j.
 func (eq eventQueue) Less(i, j int) bool {
-	return eq[i].time < eq[j].time
+	if eq[i].time != eq[j].time {
+		return eq[i].time < eq[j].time
+	}
+
+	return eq[i].id < eq[j].id
 }
 
 // Swap swaps the scheduled events at position i and j.
