@@ -16,8 +16,8 @@ func clock(proc simgo.Process, name string, delay float64) {
 func main() {
 	sim := simgo.Simulation{}
 
-	sim.ProcessReflect(clock, "fast", 0.5)
-	sim.ProcessReflect(clock, "slow", 1)
+	sim.ProcessReflect(clock, "slow", 2)
+	sim.ProcessReflect(clock, "fast", 1)
 
-	sim.RunUntil(2)
+	sim.RunUntil(5)
 }

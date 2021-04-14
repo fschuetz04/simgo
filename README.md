@@ -27,22 +27,24 @@ func clock(proc simgo.Process, name string, delay float64) {
 func main() {
     sim := simgo.Simulation{}
 
-    sim.ProcessReflect(clock, "fast", 0.5)
-    sim.ProcessReflect(clock, "slow", 1)
+    sim.ProcessReflect(clock, "slow", 2)
+    sim.ProcessReflect(clock, "fast", 1)
 
-    sim.RunUntil(2)
+    sim.RunUntil(5)
 }
 ```
 
 When run, the following output is generated:
 
 ```text
-fast 0
 slow 0
-fast 0.5
-slow 1
+fast 0
 fast 1
-fast 1.5
+slow 2
+fast 2
+fast 3
+slow 4
+fast 4
 ```
 
 You can find more examples in the `examples` directory.
