@@ -204,8 +204,8 @@ func (sim *Simulation) Run() {
 }
 
 // RunUntil runs the simulation until the event queue is empty or the next event
-// in the event queue is scheduled after the given target time. Sets the current
-// simulation time to the target time at the end.
+// in the event queue is scheduled at or after the given target time. Sets the
+// current simulation time to the target time at the end.
 //
 // Panics if the given target time is smaller than the current simulation time.
 func (sim *Simulation) RunUntil(target float64) {
@@ -213,7 +213,7 @@ func (sim *Simulation) RunUntil(target float64) {
 		panic(fmt.Sprintf("(*Simulation).RunUntil: target must not be smaller than the current simulation time: %f < %f\n", target, sim.Now()))
 	}
 
-	for len(sim.eq) > 0 && sim.eq[0].time <= target {
+	for len(sim.eq) > 0 && sim.eq[0].time < target {
 		sim.Step()
 	}
 
