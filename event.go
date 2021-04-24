@@ -72,8 +72,8 @@ func (ev *Event) Trigger() bool {
 	return true
 }
 
-// Trigger schedules the event to be processed after the given delay. This will
-// call all normal handlers of the event.
+// TriggerDelayed schedules the event to be processed after the given delay.
+// This will call all normal handlers of the event.
 //
 // If the event is not pending, it will not be scheduled.
 //
@@ -130,20 +130,20 @@ func (ev *Event) Pending() bool {
 	return ev.state == pending
 }
 
-// Pending returns whether the event has been triggered. A triggered event will
-// be processed at the current simulation time if it has not been processed
+// Triggered returns whether the event has been triggered. A triggered event
+// will be processed at the current simulation time if it has not been processed
 // already.
 func (ev *Event) Triggered() bool {
 	return ev.state == triggered || ev.Processed()
 }
 
-// Pending returns whether the event has been processed. All normal handlers of
-// a processed event are currently being called or have been called.
+// Processed returns whether the event has been processed. All normal handlers
+// of a processed event are currently being called or have been called.
 func (ev *Event) Processed() bool {
 	return ev.state == processed
 }
 
-// Aborted returns whether the event has been aborted. All abort handlers of an]
+// Aborted returns whether the event has been aborted. All abort handlers of an
 // aborted event are currently being called or have been called.
 func (ev *Event) Aborted() bool {
 	return ev.state == aborted

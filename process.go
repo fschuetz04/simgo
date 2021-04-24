@@ -93,12 +93,12 @@ func (proc Process) Triggered() bool {
 	return proc.ev.Triggered()
 }
 
-// Pending returns whether the underlying event is processed.
+// Processed returns whether the underlying event is processed.
 func (proc Process) Processed() bool {
 	return proc.ev.Processed()
 }
 
-// Pending returns whether the underlying event is aborted.
+// Aborted returns whether the underlying event is aborted.
 func (proc Process) Aborted() bool {
 	return proc.ev.Aborted()
 }
