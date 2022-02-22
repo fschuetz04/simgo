@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"reflect"
 	"runtime"
+	"sync"
 )
 
 // Simulation runs a discrete-event simulation.
@@ -26,6 +27,8 @@ type Simulation struct {
 
 	// nextID holds the next ID for scheduling a new event.
 	nextID uint64
+
+	m sync.Mutex
 }
 
 // Now returns the current simulation time.
@@ -193,8 +196,10 @@ func (sim *Simulation) Step() bool {
 		return false
 	}
 
+	sim.m.Lock()
 	qe := heap.Pop(&sim.eq).(queuedEvent)
 	sim.now = qe.time
+	sim.m.Unlock()
 	qe.ev.process()
 
 	return true
@@ -226,6 +231,8 @@ func (sim *Simulation) RunUntil(target float64) {
 // schedule schedules the given event to be processed after the given delay.
 // Adds the event to the event queue.
 func (sim *Simulation) schedule(ev *Event, delay float64) {
+	sim.m.Lock()
+	defer sim.m.Unlock()
 	heap.Push(&sim.eq, queuedEvent{
 		ev:   ev,
 		time: sim.Now() + delay,
