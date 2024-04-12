@@ -231,10 +231,10 @@ func TestRunUntil(t *testing.T) {
 
 	sim.Process(func(proc Process) {
 		assertf(t, proc.Now() == 0, "proc.Now() == %f", proc.Now())
-		proc.Wait(proc.Timeout(5))
-		assertf(t, proc.Now() == 5, "proc.Now() == %f", proc.Now())
+		proc.Wait(proc.Timeout(4))
+		assertf(t, proc.Now() == 4, "proc.Now() == %f", proc.Now())
 		finished = true
-		proc.Wait(proc.Timeout(5))
+		proc.Wait(proc.Timeout(1))
 		t.Error("Simulation was executed too far")
 	})
 

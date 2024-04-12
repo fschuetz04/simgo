@@ -14,9 +14,9 @@ import (
 //
 // To create a new simulation, use the default struct:
 //
-//     sim := simgo.Simulation{}
-//     sim.Process(myProcess)
-//     sim.Run()
+//	sim := simgo.Simulation{}
+//	sim.Process(myProcess)
+//	sim.Run()
 type Simulation struct {
 	// now holds the current simulation time.
 	now float64
