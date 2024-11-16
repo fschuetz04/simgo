@@ -3,10 +3,13 @@
 SimGo is a discrete event simulation framework for Go.
 It is similar to SimPy and aims to be easy to set up and use.
 
-Processes are defined as simple functions receiving `simgo.Process` as their first argument.
-Each process is executed in a separate goroutine, but it is guarantueed that only one process is executed at a time.
+Processes are defined as simple functions receiving `simgo.Process` as their first
+argument.
+Each process is executed in a separate goroutine, but it is guaranteed that only
+one process is executed at a time.
 For examples, look into the `examples` folder.
-A short example simulating two clocks ticking in different time intervals looks like this:
+A short example simulating two clocks ticking in different time intervals looks like
+this:
 
 ```go
 package main
