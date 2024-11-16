@@ -103,9 +103,9 @@ func (ev *Event) TriggerDelayed(delay float64) bool {
 //
 // Returns true if the event has been aborted or false otherwise.
 //
-// TODO(fschuetz04): Abort immediately calls it handlers, which leads to a
-// growing call stack. Instead, the processing could be scheduled similar to
-// that of (*Event).Trigger.
+// TODO: Abort immediately calls it handlers, which leads to a growing call
+// stack. Instead, the processing could be scheduled similar to that of
+// (*Event).Trigger.
 func (ev *Event) Abort() bool {
 	if !ev.Pending() {
 		return false

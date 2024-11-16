@@ -5,6 +5,7 @@ package simgo
 
 import (
 	"container/heap"
+	"context"
 	"fmt"
 	"reflect"
 	"runtime"
@@ -17,6 +18,9 @@ import (
 //	sim := simgo.Simulation{}
 //	sim.Process(myProcess)
 //	sim.Run()
+//
+// To create a new simulation which can be cleaned up via a context, use
+// NewSimulation instead.
 type Simulation struct {
 	// now holds the current simulation time.
 	now float64
@@ -26,6 +30,15 @@ type Simulation struct {
 
 	// nextID holds the next ID for scheduling a new event.
 	nextID uint64
+
+	// ctx hold the context used for stopping the simulation goroutines.
+	ctx context.Context
+}
+
+// Creates a new simulation with the given context. If the context is cancelled,
+// all goroutines of the simulation are stopped.
+func NewSimulation(ctx context.Context) Simulation {
+	return Simulation{ctx: ctx}
 }
 
 // Now returns the current simulation time.
@@ -44,6 +57,10 @@ func (sim *Simulation) Now() float64 {
 // Returns the process. This can be used to wait for the process to finish. As
 // soon as the process finishes, the underlying event is triggered.
 func (sim *Simulation) Process(runner func(proc Process)) Process {
+	if sim.ctx != nil && sim.ctx.Err() != nil {
+		panic("(*Simulation).Process: context has been cancelled")
+	}
+
 	proc := Process{
 		Simulation: sim,
 		ev:         sim.Event(),
@@ -97,6 +114,10 @@ func (sim *Simulation) ProcessReflect(runner interface{}, args ...interface{}) P
 
 // Event creates and returns a pending event.
 func (sim *Simulation) Event() *Event {
+	if sim.ctx != nil && sim.ctx.Err() != nil {
+		panic("(*Simulation).Event: context has been cancelled")
+	}
+
 	ev := &Event{sim: sim}
 	runtime.SetFinalizer(ev, func(ev *Event) {
 		ev.Abort()
@@ -189,6 +210,10 @@ func (sim *Simulation) AllOf(evs ...Awaitable) *Event {
 // in the event queue and processes the next event. Returns false if the event
 // queue was empty and no event was processed, true otherwise.
 func (sim *Simulation) Step() bool {
+	if sim.ctx != nil && sim.ctx.Err() != nil {
+		panic("(*Simulation).Event: context has been cancelled")
+	}
+
 	if len(sim.eq) == 0 {
 		return false
 	}
@@ -232,4 +257,14 @@ func (sim *Simulation) schedule(ev *Event, delay float64) {
 		id:   sim.nextID,
 	})
 	sim.nextID++
+}
+
+// cancelled returns ctx.Done() if the simulation is associated with a context.
+// Otherwise, it returns nil.
+func (sim *Simulation) cancelled() <-chan struct{} {
+	if sim.ctx == nil {
+		return nil
+	}
+
+	return sim.ctx.Done()
 }
