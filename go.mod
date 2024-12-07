@@ -1,3 +1,3 @@
 module github.com/fschuetz04/simgo
 
-go 1.16
+go 1.18
