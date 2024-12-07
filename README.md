@@ -54,7 +54,7 @@ You can find more examples in the `examples` directory.
 
 ## Copyright and License
 
-Copyright © 2021 Felix Schütz.
+Copyright © 2024 Felix Schütz.
 
 Licensed under the MIT License.
 See the LICENSE file for details.

@@ -1,4 +1,4 @@
-// Copyright © 2021 Felix Schütz
+// Copyright © 2024 Felix Schütz
 // Licensed under the MIT license. See the LICENSE file for details.
 
 package simgo
@@ -35,10 +35,10 @@ type Simulation struct {
 	ctx context.Context
 }
 
-// Creates a new simulation with the given context. If the context is cancelled,
-// all goroutines of the simulation are stopped.
-func NewSimulation(ctx context.Context) Simulation {
-	return Simulation{ctx: ctx}
+// NewSimulation creates a new simulation with the given context. If the context
+// is cancelled, all goroutines of the simulation are stopped.
+func NewSimulation(ctx context.Context) *Simulation {
+	return &Simulation{ctx: ctx}
 }
 
 // Now returns the current simulation time.
@@ -131,7 +131,7 @@ func (sim *Simulation) Event() *Event {
 // Panics if the given delay is negative.
 func (sim *Simulation) Timeout(delay float64) *Event {
 	if delay < 0 {
-		panic(fmt.Sprintf("(*Simulation).Timeout: delay must not be negative: %f\n", delay))
+		panic(fmt.Sprintf("(*Simulation).Timeout: delay must not be negative: %f", delay))
 	}
 
 	ev := sim.Event()
@@ -238,7 +238,7 @@ func (sim *Simulation) Run() {
 // Panics if the given target time is smaller than the current simulation time.
 func (sim *Simulation) RunUntil(target float64) {
 	if target < sim.Now() {
-		panic(fmt.Sprintf("(*Simulation).RunUntil: target must not be smaller than the current simulation time: %f < %f\n", target, sim.Now()))
+		panic(fmt.Sprintf("(*Simulation).RunUntil: target must not be smaller than the current simulation time: %f < %f", target, sim.Now()))
 	}
 
 	for len(sim.eq) > 0 && sim.eq[0].time < target {

@@ -1,4 +1,4 @@
-// Copyright © 2021 Felix Schütz
+// Copyright © 2024 Felix Schütz
 // Licensed under the MIT license. See the LICENSE file for details.
 
 package simgo

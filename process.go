@@ -1,4 +1,4 @@
-// Copyright © 2021 Felix Schütz
+// Copyright © 2024 Felix Schütz
 // Licensed under the MIT license. See the LICENSE file for details.
 
 package simgo
@@ -13,12 +13,12 @@ import "runtime"
 // To start a process, use (*Simulation).Process or
 // (*Simulation).ProcessReflect:
 //
-//     func myProcess (proc simgo.Process) {
-//         fmt.Println("Start")
-//         proc.Wait(proc.Timeout(5))
-//         fmt.Println("End")
-//     }
-//     sim.Process(myProcess)
+//	func myProcess (proc simgo.Process) {
+//	    fmt.Println("Start")
+//	    proc.Wait(proc.Timeout(5))
+//	    fmt.Println("End")
+//	}
+//	sim.Process(myProcess)
 //
 // Process encapsulates *Simulation, so all its methods can be used.
 type Process struct {

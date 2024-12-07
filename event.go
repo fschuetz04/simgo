@@ -1,4 +1,4 @@
-// Copyright © 2021 Felix Schütz
+// Copyright © 2024 Felix Schütz
 // Licensed under the MIT license. See the LICENSE file for details.
 
 package simgo
@@ -38,10 +38,10 @@ type Handler func(ev *Event)
 // To create a new event, use (*Simulation).Timeout, (*Simulation).Event,
 // (*Simulation).AnyOf, or (*Simulation).AllOf:
 //
-//     ev1 := sim.Event()
-//     ev2 := sim.Timeout(5)
-//     ev3 := sim.AnyOf(ev1, ev2)
-//     ev4 := sim.AllOf(ev1, ev2)
+//	ev1 := sim.Event()
+//	ev2 := sim.Timeout(5)
+//	ev3 := sim.AnyOf(ev1, ev2)
+//	ev4 := sim.AllOf(ev1, ev2)
 type Event struct {
 	// sim is used to schedule the event to be processed.
 	sim *Simulation
@@ -85,7 +85,7 @@ func (ev *Event) Trigger() bool {
 // processed once at the earliest scheduled time.
 func (ev *Event) TriggerDelayed(delay float64) bool {
 	if delay < 0 {
-		panic(fmt.Sprintf("(*Event).TriggerDelayed: delay must not be negative: %f\n", delay))
+		panic(fmt.Sprintf("(*Event).TriggerDelayed: delay must not be negative: %f", delay))
 	}
 
 	if !ev.Pending() {
