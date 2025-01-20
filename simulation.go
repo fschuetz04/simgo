@@ -36,7 +36,7 @@ type Simulation struct {
 }
 
 // NewSimulation creates a new simulation with the given context. If the context
-// is cancelled, all goroutines of the simulation are stopped.
+// is canceled, all goroutines of the simulation are stopped.
 func NewSimulation(ctx context.Context) *Simulation {
 	return &Simulation{ctx: ctx}
 }
@@ -55,10 +55,11 @@ func (sim *Simulation) Now() float64 {
 // It is ensured that only one process is executed at the same time.
 //
 // Returns the process. This can be used to wait for the process to finish. As
-// soon as the process finishes, the underlying event is triggered.
+// soon as the process finishes, the underlying event is triggered. Panics if
+// the associated context is canceled.
 func (sim *Simulation) Process(runner func(proc Process)) Process {
 	if sim.ctx != nil && sim.ctx.Err() != nil {
-		panic("(*Simulation).Process: context has been cancelled")
+		panic("(*Simulation).Process: context has been canceled")
 	}
 
 	proc := Process{
@@ -112,10 +113,11 @@ func (sim *Simulation) ProcessReflect(runner interface{}, args ...interface{}) P
 	})
 }
 
-// Event creates and returns a pending event.
+// Event creates and returns a pending event. Panics if the associated context
+// is canceled.
 func (sim *Simulation) Event() *Event {
 	if sim.ctx != nil && sim.ctx.Err() != nil {
-		panic("(*Simulation).Event: context has been cancelled")
+		panic("(*Simulation).Event: context has been canceled")
 	}
 
 	ev := &Event{sim: sim}
@@ -126,9 +128,7 @@ func (sim *Simulation) Event() *Event {
 }
 
 // Timeout creates and returns a pending event which is processed after the
-// given delay.
-//
-// Panics if the given delay is negative.
+// given delay. Panics if the given delay is negative.
 func (sim *Simulation) Timeout(delay float64) *Event {
 	if delay < 0 {
 		panic(fmt.Sprintf("(*Simulation).Timeout: delay must not be negative: %f", delay))
@@ -210,11 +210,7 @@ func (sim *Simulation) AllOf(evs ...Awaitable) *Event {
 // in the event queue and processes the next event. Returns false if the event
 // queue was empty and no event was processed, true otherwise.
 func (sim *Simulation) Step() bool {
-	if sim.ctx != nil && sim.ctx.Err() != nil {
-		panic("(*Simulation).Event: context has been cancelled")
-	}
-
-	if len(sim.eq) == 0 {
+	if (sim.ctx != nil && sim.ctx.Err() != nil) || len(sim.eq) == 0 {
 		return false
 	}
 
@@ -233,9 +229,8 @@ func (sim *Simulation) Run() {
 
 // RunUntil runs the simulation until the event queue is empty or the next event
 // in the event queue is scheduled at or after the given target time. Sets the
-// current simulation time to the target time at the end.
-//
-// Panics if the given target time is smaller than the current simulation time.
+// current simulation time to the target time at the end. Panics if the given
+// target time is smaller than the current simulation time.
 func (sim *Simulation) RunUntil(target float64) {
 	if target < sim.Now() {
 		panic(fmt.Sprintf("(*Simulation).RunUntil: target must not be smaller than the current simulation time: %f < %f", target, sim.Now()))
@@ -259,9 +254,9 @@ func (sim *Simulation) schedule(ev *Event, delay float64) {
 	sim.nextID++
 }
 
-// cancelled returns ctx.Done() if the simulation is associated with a context.
+// canceled returns ctx.Done() if the simulation is associated with a context.
 // Otherwise, it returns nil.
-func (sim *Simulation) cancelled() <-chan struct{} {
+func (sim *Simulation) canceled() <-chan struct{} {
 	if sim.ctx == nil {
 		return nil
 	}
