@@ -1,7 +1,8 @@
 # SimGo
 
 SimGo is a discrete event simulation framework for Go.
-It is similar to SimPy and aims to be easy to set up and use.
+It is similar to [SimPy](https://simpy.readthedocs.io/en/latest) and aims to be easy
+to set up and use.
 
 Processes are defined as simple functions receiving `simgo.Process` as their first
 argument.
