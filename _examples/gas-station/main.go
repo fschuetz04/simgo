@@ -78,9 +78,9 @@ func tankTruck(proc simgo.Process, stationFuel *Container) {
 func main() {
 	rand.Seed(time.Now().Unix())
 
-	sim := simgo.Simulation{}
+	sim := simgo.NewSimulation()
 
-	stationFuel := NewFilledCappedContainer(&sim, StationFuelCap, StationFuelCap)
+	stationFuel := NewFilledCappedContainer(sim, StationFuelCap, StationFuelCap)
 
 	sim.ProcessReflect(carSource, stationFuel)
 	sim.ProcessReflect(tankTruck, stationFuel)

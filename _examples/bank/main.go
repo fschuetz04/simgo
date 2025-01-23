@@ -51,7 +51,7 @@ func customerSource(proc simgo.Process) {
 func main() {
 	rand.Seed(time.Now().Unix())
 
-	sim := simgo.Simulation{}
+	sim := simgo.NewSimulation()
 
 	sim.Process(customerSource)
 

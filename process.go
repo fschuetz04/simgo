@@ -81,7 +81,7 @@ func (proc Process) Wait(ev Awaitable) {
 			runtime.Goexit()
 		}
 
-	case <-proc.canceled(): // wait for simulation context cancellation
+	case <-proc.shutdown: // wait for simulation shutdown
 		runtime.Goexit()
 	}
 }

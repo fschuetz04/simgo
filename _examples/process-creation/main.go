@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"runtime"
+	"time"
 
 	"github.com/fschuetz04/simgo"
 )
@@ -25,10 +26,14 @@ func processSource(proc simgo.Process) {
 }
 
 func main() {
-	sim := simgo.Simulation{}
+	sim := simgo.NewSimulation()
 
 	sim.Process(processSource)
 
 	sim.Run()
 	fmt.Printf("[    End]         => %7d\n", runtime.NumGoroutine())
+
+	sim.Shutdown()
+	time.Sleep(time.Millisecond)
+	fmt.Printf("[    Off]         => %7d\n", runtime.NumGoroutine())
 }

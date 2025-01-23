@@ -16,7 +16,7 @@ func assertf(t *testing.T, condition bool, format string, args ...interface{}) {
 }
 
 func TestAnyOfEmpty(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -33,7 +33,7 @@ func TestAnyOfEmpty(t *testing.T) {
 }
 
 func TestAnyOfTriggered(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -53,7 +53,7 @@ func TestAnyOfTriggered(t *testing.T) {
 }
 
 func TestAnyOfPending(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -72,7 +72,7 @@ func TestAnyOfPending(t *testing.T) {
 }
 
 func TestAnyOfProcessed(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -93,7 +93,7 @@ func TestAnyOfProcessed(t *testing.T) {
 }
 
 func TestAllOfEmpty(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -110,7 +110,7 @@ func TestAllOfEmpty(t *testing.T) {
 }
 
 func TestAllOfTriggered(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -131,7 +131,7 @@ func TestAllOfTriggered(t *testing.T) {
 }
 
 func TestAllOfPending(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -150,7 +150,7 @@ func TestAllOfPending(t *testing.T) {
 }
 
 func TestAllOfProcessed(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -172,7 +172,7 @@ func TestAllOfProcessed(t *testing.T) {
 }
 
 func TestWaitForProc(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := 0
 
 	proc1 := sim.Process(func(proc Process) {
@@ -191,7 +191,7 @@ func TestWaitForProc(t *testing.T) {
 }
 
 func TestWaitForProcessed(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -209,7 +209,7 @@ func TestWaitForProcessed(t *testing.T) {
 }
 
 func TestWaitForAborted(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -226,7 +226,7 @@ func TestWaitForAborted(t *testing.T) {
 }
 
 func TestRunUntil(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -248,14 +248,14 @@ func TestTriggerDelayedNegative(t *testing.T) {
 		assertf(t, err != nil, "err == nil")
 	}()
 
-	sim := Simulation{}
+	sim := NewSimulation()
 
 	ev := sim.Event()
 	ev.TriggerDelayed(-5)
 }
 
 func TestTriggerDelayedTriggered(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -277,7 +277,7 @@ func TestRunUntilNegative(t *testing.T) {
 		assertf(t, err != nil, "err == nil")
 	}()
 
-	sim := Simulation{}
+	sim := NewSimulation()
 
 	sim.RunUntil(-5)
 }
@@ -288,13 +288,13 @@ func TestTimeoutNegative(t *testing.T) {
 		assertf(t, err != nil, "err == nil")
 	}()
 
-	sim := Simulation{}
+	sim := NewSimulation()
 
 	sim.Timeout(-5)
 }
 
 func TestTrigger(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 
 	ev := sim.Event()
 	ev.Trigger()
@@ -302,7 +302,7 @@ func TestTrigger(t *testing.T) {
 }
 
 func TestTriggerTriggered(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 
 	ev := sim.Event()
 	assertf(t, ev.Trigger() == true, "ev.Trigger() == false")
@@ -310,7 +310,7 @@ func TestTriggerTriggered(t *testing.T) {
 }
 
 func TestTriggerEarly(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 	finished := false
 
 	sim.Process(func(proc Process) {
@@ -327,7 +327,7 @@ func TestTriggerEarly(t *testing.T) {
 }
 
 func TestAbort(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 
 	ev := sim.Event()
 	ev.Abort()
@@ -335,7 +335,7 @@ func TestAbort(t *testing.T) {
 }
 
 func TestAbortTriggered(t *testing.T) {
-	sim := Simulation{}
+	sim := NewSimulation()
 
 	ev := sim.Event()
 	assertf(t, ev.Trigger() == true, "ev.Trigger() == false")

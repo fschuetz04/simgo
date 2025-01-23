@@ -29,7 +29,7 @@ func clock(proc simgo.Process, name string, delay float64) {
 }
 
 func main() {
-    sim := simgo.Simulation{}
+    sim := simgo.NewSimulation()
 
     sim.ProcessReflect(clock, "slow", 2)
     sim.ProcessReflect(clock, "fast", 1)

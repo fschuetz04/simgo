@@ -5,22 +5,13 @@ package simgo
 
 import (
 	"container/heap"
-	"context"
 	"fmt"
 	"reflect"
 	"runtime"
 )
 
-// Simulation runs a discrete-event simulation.
-//
-// To create a new simulation, use the default struct:
-//
-//	sim := simgo.Simulation{}
-//	sim.Process(myProcess)
-//	sim.Run()
-//
-// To create a new simulation which can be cleaned up via a context, use
-// NewSimulation instead.
+// Simulation runs a discrete-event simulation. To create a new simulation, use
+// NewSimulation().
 type Simulation struct {
 	// now holds the current simulation time.
 	now float64
@@ -31,14 +22,13 @@ type Simulation struct {
 	// nextID holds the next ID for scheduling a new event.
 	nextID uint64
 
-	// ctx hold the context used for stopping the simulation goroutines.
-	ctx context.Context
+	// shutdown is used to shutdown all process goroutines of this simulation.
+	shutdown chan struct{}
 }
 
-// NewSimulation creates a new simulation with the given context. If the context
-// is canceled, all goroutines of the simulation are stopped.
-func NewSimulation(ctx context.Context) *Simulation {
-	return &Simulation{ctx: ctx}
+// NewSimulation creates a new simulation.
+func NewSimulation() *Simulation {
+	return &Simulation{shutdown: make(chan struct{})}
 }
 
 // Now returns the current simulation time.
@@ -55,13 +45,8 @@ func (sim *Simulation) Now() float64 {
 // It is ensured that only one process is executed at the same time.
 //
 // Returns the process. This can be used to wait for the process to finish. As
-// soon as the process finishes, the underlying event is triggered. Panics if
-// the associated context is canceled.
+// soon as the process finishes, the underlying event is triggered.
 func (sim *Simulation) Process(runner func(proc Process)) Process {
-	if sim.ctx != nil && sim.ctx.Err() != nil {
-		panic("(*Simulation).Process: context has been canceled")
-	}
-
 	proc := Process{
 		Simulation: sim,
 		ev:         sim.Event(),
@@ -113,13 +98,8 @@ func (sim *Simulation) ProcessReflect(runner interface{}, args ...interface{}) P
 	})
 }
 
-// Event creates and returns a pending event. Panics if the associated context
-// is canceled.
+// Event creates and returns a pending event.
 func (sim *Simulation) Event() *Event {
-	if sim.ctx != nil && sim.ctx.Err() != nil {
-		panic("(*Simulation).Event: context has been canceled")
-	}
-
 	ev := &Event{sim: sim}
 	runtime.SetFinalizer(ev, func(ev *Event) {
 		ev.Abort()
@@ -141,6 +121,7 @@ func (sim *Simulation) Timeout(delay float64) *Event {
 
 // AnyOf creates and returns a pending event which is triggered when any of the
 // given events is processed.
+// TODO: Handle aborted events.
 func (sim *Simulation) AnyOf(evs ...Awaitable) *Event {
 	// if no events are given, the returned event is immediately triggered
 	if len(evs) == 0 {
@@ -168,6 +149,7 @@ func (sim *Simulation) AnyOf(evs ...Awaitable) *Event {
 
 // AllOf creates and returns a pending event which is triggered when all of the
 // given events are processed.
+// TODO: Handle aborted events.
 func (sim *Simulation) AllOf(evs ...Awaitable) *Event {
 	n := len(evs)
 
@@ -210,7 +192,7 @@ func (sim *Simulation) AllOf(evs ...Awaitable) *Event {
 // in the event queue and processes the next event. Returns false if the event
 // queue was empty and no event was processed, true otherwise.
 func (sim *Simulation) Step() bool {
-	if (sim.ctx != nil && sim.ctx.Err() != nil) || len(sim.eq) == 0 {
+	if len(sim.eq) == 0 {
 		return false
 	}
 
@@ -243,6 +225,11 @@ func (sim *Simulation) RunUntil(target float64) {
 	sim.now = target
 }
 
+// Shutdown shuts down all process goroutines of this simulation.
+func (sim *Simulation) Shutdown() {
+	close(sim.shutdown)
+}
+
 // schedule schedules the given event to be processed after the given delay.
 // Adds the event to the event queue.
 func (sim *Simulation) schedule(ev *Event, delay float64) {
@@ -252,14 +239,4 @@ func (sim *Simulation) schedule(ev *Event, delay float64) {
 		id:   sim.nextID,
 	})
 	sim.nextID++
-}
-
-// canceled returns ctx.Done() if the simulation is associated with a context.
-// Otherwise, it returns nil.
-func (sim *Simulation) canceled() <-chan struct{} {
-	if sim.ctx == nil {
-		return nil
-	}
-
-	return sim.ctx.Done()
 }

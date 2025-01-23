@@ -12,12 +12,12 @@ func TestStoreCapacityZero(t *testing.T) {
 		}
 	}()
 
-	sim := &Simulation{}
+	sim := NewSimulation()
 	NewStoreWithCapacity[int](sim, 0)
 }
 
 func TestStoreCapacityPut(t *testing.T) {
-	sim := &Simulation{}
+	sim := NewSimulation()
 	capacity := 2
 	store := NewStoreWithCapacity[int](sim, capacity)
 
@@ -33,7 +33,7 @@ func TestStoreCapacityPut(t *testing.T) {
 }
 
 func TestStoreImmediatePut(t *testing.T) {
-	sim := &Simulation{}
+	sim := NewSimulation()
 	store := NewStoreWithCapacity[int](sim, 1)
 	finished := false
 
@@ -85,7 +85,7 @@ func TestStoreImmediatePut(t *testing.T) {
 }
 
 func TestStoreImmediateGet(t *testing.T) {
-	sim := &Simulation{}
+	sim := NewSimulation()
 	store := NewStoreWithCapacity[int](sim, 1)
 	finished := false
 
