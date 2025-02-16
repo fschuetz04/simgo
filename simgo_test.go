@@ -1,6 +1,3 @@
-// Copyright © 2024 Felix Schütz
-// Licensed under the MIT license. See the LICENSE file for details.
-
 package simgo
 
 import (

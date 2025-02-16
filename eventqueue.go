@@ -1,6 +1,3 @@
-// Copyright © 2024 Felix Schütz
-// Licensed under the MIT license. See the LICENSE file for details.
-
 package simgo
 
 // queuedEvent is an event which is scheduled to be processed at a particular

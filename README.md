@@ -53,9 +53,7 @@ fast 4
 
 You can find more examples in the `examples` directory.
 
-## Copyright and License
-
-Copyright © 2024 Felix Schütz.
+## License
 
 Licensed under the MIT License.
-See the LICENSE file for details.
+See the [licence file](LICENSE) for details.
