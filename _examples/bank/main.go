@@ -16,7 +16,7 @@ const (
 	MeanTimeInBank      = 12
 )
 
-func customer(proc simgo.Process, id int, counters *Resource) {
+func customer(proc simgo.Process, id int, counters *simgo.Resource) {
 	fmt.Printf("[%5.1f] Customer %d arrives\n", proc.Now(), id)
 
 	request := counters.Request()
@@ -39,7 +39,7 @@ func customer(proc simgo.Process, id int, counters *Resource) {
 }
 
 func customerSource(proc simgo.Process) {
-	counters := NewResource(proc, NCounters)
+	counters := simgo.NewResource(proc.Simulation, NCounters)
 
 	for id := 1; id <= NCustomers; id++ {
 		proc.ProcessReflect(customer, id, counters)

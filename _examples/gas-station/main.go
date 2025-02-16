@@ -26,7 +26,7 @@ func randUniformInt(min int, max int) int {
 	return rand.Intn(max-min+1) + min
 }
 
-func car(proc simgo.Process, i int, pumps *Resource, stationFuel *Container) {
+func car(proc simgo.Process, i int, pumps *simgo.Resource, stationFuel *Container) {
 	fmt.Printf("[%6.1f] Car %d arrives\n", proc.Now(), i)
 	start := proc.Now()
 
@@ -49,7 +49,7 @@ func car(proc simgo.Process, i int, pumps *Resource, stationFuel *Container) {
 }
 
 func carSource(proc simgo.Process, stationFuel *Container) {
-	pumps := NewResource(proc, NPumps)
+	pumps := simgo.NewResource(proc.Simulation, NPumps)
 
 	for i := 1; ; i++ {
 		delay := randUniformInt(MinArrivalInterval, MaxArrivalInterval)
