@@ -38,7 +38,7 @@ func TestStoreImmediatePut(t *testing.T) {
 		// store is not full, immediate put request
 		put_ev := store.Put(0)
 
-		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.puts))
+		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.gets))
 		assertf(t, len(store.puts) == 0, "len(store.puts) == %d", len(store.puts))
 		assertf(t, store.Available() == 1, "store.Available() == %d", store.Available())
 		assertf(t, put_ev.Triggered(), "put_ev.Triggered() == false")
@@ -46,7 +46,7 @@ func TestStoreImmediatePut(t *testing.T) {
 		// store is not empty, immediate get request
 		get_ev := store.Get()
 
-		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.puts))
+		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.gets))
 		assertf(t, len(store.puts) == 0, "len(store.puts) == %d", len(store.puts))
 		assertf(t, store.Available() == 0, "store.Available() == %d", store.Available())
 		assertf(t, get_ev.Triggered(), "get_ev.Triggered() == false")
@@ -54,7 +54,7 @@ func TestStoreImmediatePut(t *testing.T) {
 		// store is empty, get request queued
 		get_ev = store.Get()
 
-		assertf(t, len(store.gets) == 1, "len(store.gets) == %d", len(store.puts))
+		assertf(t, len(store.gets) == 1, "len(store.gets) == %d", len(store.gets))
 		assertf(t, len(store.puts) == 0, "len(store.puts) == %d", len(store.puts))
 		assertf(t, store.Available() == 0, "store.Available() == %d", store.Available())
 		assertf(t, !get_ev.Triggered(), "get_ev.Triggered() == true")
@@ -62,7 +62,7 @@ func TestStoreImmediatePut(t *testing.T) {
 		// store is not full, immediate put request
 		put_ev = store.Put(1)
 
-		assertf(t, len(store.gets) == 1, "len(store.gets) == %d", len(store.puts))
+		assertf(t, len(store.gets) == 1, "len(store.gets) == %d", len(store.gets))
 		assertf(t, len(store.puts) == 0, "len(store.puts) == %d", len(store.puts))
 		assertf(t, store.Available() == 1, "store.Available() == %d", store.Available())
 		assertf(t, put_ev.Triggered(), "put_ev.Triggered() == false")
@@ -70,7 +70,7 @@ func TestStoreImmediatePut(t *testing.T) {
 		// get request will now be triggered
 		proc.Wait(get_ev)
 
-		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.puts))
+		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.gets))
 		assertf(t, len(store.puts) == 0, "len(store.puts) == %d", len(store.puts))
 		assertf(t, store.Available() == 0, "store.Available() == %d", store.Available())
 
@@ -90,7 +90,7 @@ func TestStoreImmediateGet(t *testing.T) {
 		// store is not full, immediate put request
 		put_ev := store.Put(0)
 
-		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.puts))
+		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.gets))
 		assertf(t, len(store.puts) == 0, "len(store.puts) == %d", len(store.puts))
 		assertf(t, store.Available() == 1, "store.Available() == %d", store.Available())
 		assertf(t, put_ev.Triggered(), "put_ev.Triggered() == false")
@@ -98,7 +98,7 @@ func TestStoreImmediateGet(t *testing.T) {
 		// store is full, put request queued
 		put_ev = store.Put(1)
 
-		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.puts))
+		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.gets))
 		assertf(t, len(store.puts) == 1, "len(store.puts) == %d", len(store.puts))
 		assertf(t, store.Available() == 1, "store.Available() == %d", store.Available())
 		assertf(t, !put_ev.Triggered(), "put_ev.Triggered() == true")
@@ -106,7 +106,7 @@ func TestStoreImmediateGet(t *testing.T) {
 		// store is not empty, immediate get request
 		get_ev := store.Get()
 
-		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.puts))
+		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.gets))
 		assertf(t, len(store.puts) == 1, "len(store.puts) == %d", len(store.puts))
 		assertf(t, store.Available() == 0, "store.Available() == %d", store.Available())
 		assertf(t, get_ev.Triggered(), "get_ev.Triggered() == false")
@@ -114,7 +114,7 @@ func TestStoreImmediateGet(t *testing.T) {
 		// put request will now be triggered
 		proc.Wait(put_ev)
 
-		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.puts))
+		assertf(t, len(store.gets) == 0, "len(store.gets) == %d", len(store.gets))
 		assertf(t, len(store.puts) == 0, "len(store.puts) == %d", len(store.puts))
 		assertf(t, store.Available() == 1, "store.Available() == %d", store.Available())
 
