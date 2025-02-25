@@ -82,7 +82,7 @@ func (sim *Simulation) Process(runner func(proc Process)) Process {
 // additional argument. This uses reflection.
 //
 // See (*Simulation).Process for further documentation.
-func (sim *Simulation) ProcessReflect(runner interface{}, args ...interface{}) Process {
+func (sim *Simulation) ProcessReflect(runner any, args ...any) Process {
 	return sim.Process(func(proc Process) {
 		reflectF := reflect.ValueOf(runner)
 		reflectArgs := make([]reflect.Value, len(args)+1)
@@ -114,75 +114,6 @@ func (sim *Simulation) Timeout(delay float64) *Event {
 	ev := sim.Event()
 	ev.TriggerDelayed(delay)
 	return ev
-}
-
-// AnyOf creates and returns a pending event which is triggered when any of the
-// given events is processed.
-// TODO: Handle aborted events.
-func (sim *Simulation) AnyOf(evs ...Awaitable) *Event {
-	// if no events are given, the returned event is immediately triggered
-	if len(evs) == 0 {
-		return sim.Timeout(0)
-	}
-
-	// if any event is already processed, the returned event is immediately
-	// triggered
-	for _, ev := range evs {
-		if ev.Processed() {
-			return sim.Timeout(0)
-		}
-	}
-
-	anyOf := sim.Event()
-
-	for _, ev := range evs {
-		// when the event is processed, the condition is fulfilled, so trigger
-		// the returned event
-		ev.AddHandler(func(ev *Event) { anyOf.Trigger() })
-	}
-
-	return anyOf
-}
-
-// AllOf creates and returns a pending event which is triggered when all of the
-// given events are processed.
-// TODO: Handle aborted events.
-func (sim *Simulation) AllOf(evs ...Awaitable) *Event {
-	n := len(evs)
-
-	// check how many events are already processed
-	for _, ev := range evs {
-		if ev.Processed() {
-			n--
-		}
-	}
-
-	// if no events are given or all events are already processed, the returned
-	// event is immediately triggered
-	if n == 0 {
-		return sim.Timeout(0)
-	}
-
-	allOf := sim.Event()
-
-	for _, ev := range evs {
-		// when the event is processed, check whether the condition is
-		// fulfilled, and trigger the returned event if so
-		ev.AddHandler(func(ev *Event) {
-			n--
-			if n == 0 {
-				allOf.Trigger()
-			}
-		})
-
-		// if the event is aborted, the condition cannot be fulfilled, so abort
-		// the returned event
-		ev.AddAbortHandler(func(ev *Event) {
-			allOf.Abort()
-		})
-	}
-
-	return allOf
 }
 
 // Step sets the current simulation time to the scheduled time of the next event

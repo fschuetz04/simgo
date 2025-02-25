@@ -38,12 +38,12 @@ func (eq eventQueue) Swap(i, j int) {
 }
 
 // Push appends the given scheduled event at the back.
-func (eq *eventQueue) Push(item interface{}) {
+func (eq *eventQueue) Push(item any) {
 	*eq = append(*eq, item.(queuedEvent))
 }
 
 // Pop removes and returns the scheduled event at the front.
-func (eq *eventQueue) Pop() interface{} {
+func (eq *eventQueue) Pop() any {
 	n := len(*eq)
 	item := (*eq)[n-1]
 	*eq = (*eq)[:n-1]

@@ -2,6 +2,13 @@ package simgo
 
 import "testing"
 
+func assertf(t *testing.T, condition bool, format string, args ...any) {
+	t.Helper()
+	if !condition {
+		t.Errorf(format, args...)
+	}
+}
+
 func TestStoreCapacityZero(t *testing.T) {
 	defer func() {
 		if r := recover(); r == nil {
